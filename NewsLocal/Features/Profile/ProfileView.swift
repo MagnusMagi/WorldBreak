@@ -3,6 +3,9 @@ import SwiftUI
 struct ProfileView: View {
     @Binding var selectedTab: TabItem
     @StateObject private var viewModel = ProfileViewModel()
+    @State private var showingReadingHistory = false
+    @State private var showingSettings = false
+    @State private var showingEditProfile = false
     
     var body: some View {
         NavigationView {
@@ -119,7 +122,7 @@ struct ProfileView: View {
                                     count: viewModel.recentArticles.count,
                                     color: .blue
                                 ) {
-                                    print("📚 Recent articles tapped!")
+                                    showingReadingHistory = true
                                 }
                                 
                                 QuickAccessButton(
@@ -155,7 +158,7 @@ struct ProfileView: View {
                                     icon: "person.circle",
                                     title: "Edit Profile",
                                     action: {
-                                        print("👤 Edit Profile tapped!")
+                                        showingEditProfile = true
                                     }
                                 )
                             
@@ -171,7 +174,7 @@ struct ProfileView: View {
                                 icon: "gear",
                                 title: "Settings",
                                 action: {
-                                    print("⚙️ Settings tapped!")
+                                    showingSettings = true
                                 }
                             )
                             
@@ -198,6 +201,15 @@ struct ProfileView: View {
                     .padding(.horizontal, 20)
                 }
             }
+        }
+        .sheet(isPresented: $showingReadingHistory) {
+            ReadingHistoryView()
+        }
+        .sheet(isPresented: $showingSettings) {
+            SettingsView()
+        }
+        .sheet(isPresented: $showingEditProfile) {
+            EditProfileView()
         }
     }
 }
