@@ -5,6 +5,8 @@ struct SearchView: View {
     @Binding var selectedTab: TabItem
     @StateObject private var viewModel = SearchViewModel()
     @State private var showingFilterSheet = false
+    @State private var showingVoiceSearch = false
+    @State private var showingImageSearch = false
     
     var body: some View {
         StandardPageWrapper(
@@ -28,6 +30,12 @@ struct SearchView: View {
                         onSuggestionSelected: { suggestion in
                             viewModel.searchText = suggestion
                             viewModel.performSearch()
+                        },
+                        onVoiceSearch: {
+                            showingVoiceSearch = true
+                        },
+                        onImageSearch: {
+                            showingImageSearch = true
                         }
                     )
                     
@@ -65,6 +73,24 @@ struct SearchView: View {
                 onClear: {
                     viewModel.clearFilters()
                     showingFilterSheet = false
+                }
+            )
+        }
+        .sheet(isPresented: $showingVoiceSearch) {
+            VoiceSearchView(
+                isPresented: $showingVoiceSearch,
+                onSearchResult: { result in
+                    viewModel.searchText = result
+                    viewModel.performSearch()
+                }
+            )
+        }
+        .sheet(isPresented: $showingImageSearch) {
+            ImageSearchView(
+                isPresented: $showingImageSearch,
+                onSearchResult: { result in
+                    viewModel.searchText = result
+                    viewModel.performSearch()
                 }
             )
         }

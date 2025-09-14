@@ -5,6 +5,8 @@ struct SearchBarView: View {
     @Binding var searchText: String
     let onSearchButtonClicked: () -> Void
     let onSuggestionSelected: ((String) -> Void)?
+    let onVoiceSearch: (() -> Void)?
+    let onImageSearch: (() -> Void)?
     
     @State private var isSearching = false
     @State private var showSuggestions = false
@@ -12,11 +14,15 @@ struct SearchBarView: View {
     init(
         searchText: Binding<String>,
         onSearchButtonClicked: @escaping () -> Void,
-        onSuggestionSelected: ((String) -> Void)? = nil
+        onSuggestionSelected: ((String) -> Void)? = nil,
+        onVoiceSearch: (() -> Void)? = nil,
+        onImageSearch: (() -> Void)? = nil
     ) {
         self._searchText = searchText
         self.onSearchButtonClicked = onSearchButtonClicked
         self.onSuggestionSelected = onSuggestionSelected
+        self.onVoiceSearch = onVoiceSearch
+        self.onImageSearch = onImageSearch
     }
     
     var body: some View {
@@ -35,6 +41,28 @@ struct SearchBarView: View {
                         .onChange(of: searchText) { _ in
                             showSuggestions = !searchText.isEmpty
                         }
+                    
+                    // Voice Search Button
+                    if let onVoiceSearch = onVoiceSearch {
+                        Button(action: {
+                            onVoiceSearch()
+                            showSuggestions = false
+                        }) {
+                            Image(systemName: "mic.fill")
+                                .foregroundColor(DesignSystem.Colors.primary)
+                        }
+                    }
+                    
+                    // Image Search Button
+                    if let onImageSearch = onImageSearch {
+                        Button(action: {
+                            onImageSearch()
+                            showSuggestions = false
+                        }) {
+                            Image(systemName: "camera.fill")
+                                .foregroundColor(DesignSystem.Colors.primary)
+                        }
+                    }
                     
                     if !searchText.isEmpty {
                         Button(action: {
