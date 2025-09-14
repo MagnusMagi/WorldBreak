@@ -36,6 +36,9 @@ struct SearchView: View {
                         },
                         onImageSearch: {
                             showingImageSearch = true
+                        },
+                        onClear: {
+                            viewModel.clearSearch()
                         }
                     )
                     

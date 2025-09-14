@@ -7,6 +7,7 @@ struct SearchBarView: View {
     let onSuggestionSelected: ((String) -> Void)?
     let onVoiceSearch: (() -> Void)?
     let onImageSearch: (() -> Void)?
+    let onClear: (() -> Void)?
     
     @State private var isSearching = false
     @State private var showSuggestions = false
@@ -16,13 +17,15 @@ struct SearchBarView: View {
         onSearchButtonClicked: @escaping () -> Void,
         onSuggestionSelected: ((String) -> Void)? = nil,
         onVoiceSearch: (() -> Void)? = nil,
-        onImageSearch: (() -> Void)? = nil
+        onImageSearch: (() -> Void)? = nil,
+        onClear: (() -> Void)? = nil
     ) {
         self._searchText = searchText
         self.onSearchButtonClicked = onSearchButtonClicked
         self.onSuggestionSelected = onSuggestionSelected
         self.onVoiceSearch = onVoiceSearch
         self.onImageSearch = onImageSearch
+        self.onClear = onClear
     }
     
     var body: some View {
@@ -74,6 +77,7 @@ struct SearchBarView: View {
                         Button(action: {
                             searchText = ""
                             showSuggestions = false
+                            onClear?()
                         }) {
                             Image(systemName: "xmark.circle.fill")
                                 .foregroundColor(DesignSystem.Colors.textSecondary)
@@ -105,6 +109,7 @@ struct SearchBarView: View {
                             searchText = ""
                             showSuggestions = false
                         }
+                        onClear?()
                         // Dismiss keyboard
                         UIApplication.shared.sendAction(#selector(UIResponder.resignFirstResponder), to: nil, from: nil, for: nil)
                     }
