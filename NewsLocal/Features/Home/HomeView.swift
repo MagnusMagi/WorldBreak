@@ -65,40 +65,23 @@ struct HomeView: View {
                         }
                         
                         
-                        // Minimalist Category Sections
+                        // Standardized Category Sections
                         ForEach(NewsCategory.allCases.prefix(3), id: \.id) { category in
                             if let articles = categoryArticles[category], !articles.isEmpty {
-                                VStack(spacing: 0) {
-                                    // Minimalist category header
-                                    MinimalistSectionHeader(title: category.displayName) {
+                                // Convert NewsCategory to CategoryStandards.MainCategory
+                                let standardizedCategory = convertToStandardizedCategory(category)
+                                
+                                StandardizedCategoryView(
+                                    category: standardizedCategory,
+                                    articles: Array(articles.prefix(5)),
+                                    onArticleTap: { article in
+                                        // TODO: Navigate to article detail
+                                    },
+                                    onSeeAll: {
                                         selectedCategory = category
                                         viewModel.fetchNewsByCategory(category)
                                     }
-                                    
-                                    Divider()
-                                        .background(DesignSystem.Colors.border)
-                                    
-                                    // Minimalist compact articles
-                                    LazyVStack(spacing: 0) {
-                                        ForEach(Array(articles.prefix(3))) { article in
-                                            MinimalistCompactArticleCard(
-                                                article: article,
-                                                onTap: {
-                                                    // TODO: Navigate to article detail
-                                                }
-                                            )
-                                            
-                                            if article.id != articles.prefix(3).last?.id {
-                                                Divider()
-                                                    .background(DesignSystem.Colors.border)
-                                                    .padding(.horizontal, DesignSystem.Spacing.lg)
-                                            }
-                                        }
-                                    }
-                                }
-                                .background(Color(.systemBackground))
-                                .cornerRadius(DesignSystem.Spacing.sm)
-                                .shadow(color: DesignSystem.Colors.shadow, radius: 1, x: 0, y: 1)
+                                )
                                 .padding(.horizontal, DesignSystem.Spacing.md)
                             }
                         }
@@ -208,6 +191,22 @@ struct HomeView: View {
     private func refreshHomepageData() async {
         viewModel.fetchTopHeadlines()
         loadMockData()
+    }
+    
+    private func convertToStandardizedCategory(_ category: NewsCategory) -> CategoryStandards.MainCategory {
+        switch category.id {
+        case "general": return .general
+        case "technology": return .technology
+        case "business": return .business
+        case "science": return .science
+        case "health": return .health
+        case "sports": return .sports
+        case "entertainment": return .entertainment
+        case "politics": return .politics
+        case "world": return .world
+        case "local": return .local
+        default: return .general
+        }
     }
     
     private func loadMockData() {
