@@ -191,8 +191,8 @@ class SearchViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    /// Load search suggestions
-    private func loadSearchSuggestions(for query: String) {
+    /// Load search suggestions (public method)
+    func loadSearchSuggestions(for query: String) {
         guard query.count >= 2 else {
             searchSuggestions = []
             return

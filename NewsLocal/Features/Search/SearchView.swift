@@ -24,6 +24,10 @@ struct SearchView: View {
                         searchText: $viewModel.searchText,
                         onSearchButtonClicked: {
                             viewModel.performSearch()
+                        },
+                        onSuggestionSelected: { suggestion in
+                            viewModel.searchText = suggestion
+                            viewModel.performSearch()
                         }
                     )
                     
