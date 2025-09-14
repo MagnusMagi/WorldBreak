@@ -35,7 +35,7 @@ class SearchViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let newsService: NewsServiceProtocol
     private var searchWorkItem: DispatchWorkItem?
-    private let maxHistoryItems = 10
+    let searchHistoryManager = SearchHistoryManager()
     
     // MARK: - Initialization
     
@@ -44,6 +44,7 @@ class SearchViewModel: ObservableObject {
         loadSearchHistory()
         loadTrendingTopics()
         setupSearchTextObserver()
+        setupHistoryManagerObserver()
     }
     
     // MARK: - Public Methods
@@ -75,7 +76,7 @@ class SearchViewModel: ObservableObject {
         hasMoreResults = true
         
         // Add to search history
-        addToSearchHistory(searchText)
+        searchHistoryManager.addSearchQuery(searchText)
         
         // Perform search
         newsService.searchArticles(
@@ -174,8 +175,7 @@ class SearchViewModel: ObservableObject {
     
     /// Clear search history
     func clearSearchHistory() {
-        searchHistory = []
-        saveSearchHistory()
+        searchHistoryManager.clearAllHistory()
     }
     
     // MARK: - Private Methods
@@ -194,16 +194,20 @@ class SearchViewModel: ObservableObject {
     /// Load search suggestions (public method)
     func loadSearchSuggestions(for query: String) {
         guard query.count >= 2 else {
-            searchSuggestions = []
+            // Show history-based suggestions for short queries
+            searchSuggestions = searchHistoryManager.getSearchSuggestions(for: query)
             return
         }
         
+        // Combine API suggestions with history-based suggestions
         newsService.getSearchSuggestions(query: query)
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveCompletion: { _ in },
-                receiveValue: { [weak self] suggestions in
-                    self?.searchSuggestions = suggestions
+                receiveValue: { [weak self] apiSuggestions in
+                    let historySuggestions = self?.searchHistoryManager.getSearchSuggestions(for: query) ?? []
+                    let combinedSuggestions = Array(Set(apiSuggestions + historySuggestions))
+                    self?.searchSuggestions = Array(combinedSuggestions.prefix(5))
                 }
             )
             .store(in: &cancellables)
@@ -222,35 +226,21 @@ class SearchViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    /// Load search history from UserDefaults
+    /// Setup history manager observer
+    private func setupHistoryManagerObserver() {
+        searchHistoryManager.$searchHistory
+            .map { $0.map { $0.query } }
+            .assign(to: \.searchHistory, on: self)
+            .store(in: &cancellables)
+        
+        searchHistoryManager.$recentSearches
+            .assign(to: \.searchHistory, on: self)
+            .store(in: &cancellables)
+    }
+    
+    /// Load search history from SearchHistoryManager
     private func loadSearchHistory() {
-        if let history = UserDefaults.standard.stringArray(forKey: "searchHistory") {
-            searchHistory = history
-        }
-    }
-    
-    /// Save search history to UserDefaults
-    private func saveSearchHistory() {
-        UserDefaults.standard.set(searchHistory, forKey: "searchHistory")
-    }
-    
-    /// Add query to search history
-    private func addToSearchHistory(_ query: String) {
-        let trimmedQuery = query.trimmingCharacters(in: .whitespacesAndNewlines)
-        guard !trimmedQuery.isEmpty else { return }
-        
-        // Remove if already exists
-        searchHistory.removeAll { $0 == trimmedQuery }
-        
-        // Add to beginning
-        searchHistory.insert(trimmedQuery, at: 0)
-        
-        // Limit history size
-        if searchHistory.count > maxHistoryItems {
-            searchHistory = Array(searchHistory.prefix(maxHistoryItems))
-        }
-        
-        saveSearchHistory()
+        searchHistory = searchHistoryManager.getRecentSearches()
     }
     
     // MARK: - Computed Properties

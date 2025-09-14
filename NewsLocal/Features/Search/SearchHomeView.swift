@@ -20,6 +20,11 @@ struct SearchHomeView: View {
                     TrendingTopicsSection(viewModel: viewModel)
                 }
                 
+                // Favorite Searches Section
+                if !viewModel.searchHistoryManager.favoriteSearches.isEmpty {
+                    FavoriteSearchesSection(viewModel: viewModel)
+                }
+                
                 // Search History Section
                 if !viewModel.searchHistory.isEmpty {
                     SearchHistorySection(viewModel: viewModel)
@@ -70,6 +75,41 @@ struct TrendingTopicsSection: View {
     }
 }
 
+struct FavoriteSearchesSection: View {
+    @ObservedObject var viewModel: SearchViewModel
+    
+    var body: some View {
+        VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
+            HStack {
+                Text("Favorite Searches")
+                    .font(DesignSystem.Typography.title3)
+                    .fontWeight(.semibold)
+                    .foregroundColor(DesignSystem.Colors.textPrimary)
+                
+                Spacer()
+                
+                Image(systemName: "heart.fill")
+                    .font(.caption)
+                    .foregroundColor(DesignSystem.Colors.error)
+            }
+            
+            VStack(spacing: DesignSystem.Spacing.sm) {
+                ForEach(viewModel.searchHistoryManager.favoriteSearches.prefix(5), id: \.self) { query in
+                    FavoriteSearchItem(
+                        query: query,
+                        onSearch: {
+                            viewModel.searchFromHistory(query)
+                        },
+                        onToggleFavorite: {
+                            viewModel.searchHistoryManager.toggleFavorite(query)
+                        }
+                    )
+                }
+            }
+        }
+    }
+}
+
 struct SearchHistorySection: View {
     @ObservedObject var viewModel: SearchViewModel
     
@@ -92,9 +132,15 @@ struct SearchHistorySection: View {
             
             VStack(spacing: DesignSystem.Spacing.sm) {
                 ForEach(viewModel.searchHistory.prefix(5), id: \.self) { query in
-                    SearchHistoryItem(query: query) {
-                        viewModel.searchFromHistory(query)
-                    }
+                    SearchHistoryItem(
+                        query: query,
+                        onSearch: {
+                            viewModel.searchFromHistory(query)
+                        },
+                        onToggleFavorite: {
+                            viewModel.searchHistoryManager.toggleFavorite(query)
+                        }
+                    )
                 }
             }
         }
@@ -174,32 +220,89 @@ struct TrendingTopicCard: View {
 
 struct SearchHistoryItem: View {
     let query: String
-    let action: () -> Void
+    let onSearch: () -> Void
+    let onToggleFavorite: () -> Void
     
     var body: some View {
-        Button(action: action) {
-            HStack(spacing: DesignSystem.Spacing.md) {
-                Image(systemName: "clock")
-                    .font(.caption)
-                    .foregroundColor(DesignSystem.Colors.textSecondary)
-                    .frame(width: 16)
-                
-                Text(query)
-                    .font(DesignSystem.Typography.body)
-                    .foregroundColor(DesignSystem.Colors.textPrimary)
-                
-                Spacer()
-                
-                Image(systemName: "arrow.up.left")
+        HStack(spacing: DesignSystem.Spacing.md) {
+            Button(action: onSearch) {
+                HStack(spacing: DesignSystem.Spacing.md) {
+                    Image(systemName: "clock")
+                        .font(.caption)
+                        .foregroundColor(DesignSystem.Colors.textSecondary)
+                        .frame(width: 16)
+                    
+                    Text(query)
+                        .font(DesignSystem.Typography.body)
+                        .foregroundColor(DesignSystem.Colors.textPrimary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "arrow.up.left")
+                        .font(.caption)
+                        .foregroundColor(DesignSystem.Colors.textSecondary)
+                }
+                .padding(.horizontal, DesignSystem.Spacing.md)
+                .padding(.vertical, DesignSystem.Spacing.sm)
+                .background(DesignSystem.Colors.backgroundSecondary)
+                .cornerRadius(DesignSystem.CornerRadius.md)
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            Button(action: onToggleFavorite) {
+                Image(systemName: "heart")
                     .font(.caption)
                     .foregroundColor(DesignSystem.Colors.textSecondary)
             }
-            .padding(.horizontal, DesignSystem.Spacing.md)
-            .padding(.vertical, DesignSystem.Spacing.sm)
-            .background(DesignSystem.Colors.backgroundSecondary)
-            .cornerRadius(DesignSystem.CornerRadius.md)
+            .buttonStyle(PlainButtonStyle())
         }
-        .buttonStyle(PlainButtonStyle())
+    }
+}
+
+struct FavoriteSearchItem: View {
+    let query: String
+    let onSearch: () -> Void
+    let onToggleFavorite: () -> Void
+    
+    var body: some View {
+        HStack(spacing: DesignSystem.Spacing.md) {
+            Button(action: onSearch) {
+                HStack(spacing: DesignSystem.Spacing.md) {
+                    Image(systemName: "heart.fill")
+                        .font(.caption)
+                        .foregroundColor(DesignSystem.Colors.error)
+                        .frame(width: 16)
+                    
+                    Text(query)
+                        .font(DesignSystem.Typography.body)
+                        .foregroundColor(DesignSystem.Colors.textPrimary)
+                    
+                    Spacer()
+                    
+                    Image(systemName: "arrow.up.left")
+                        .font(.caption)
+                        .foregroundColor(DesignSystem.Colors.textSecondary)
+                }
+                .padding(.horizontal, DesignSystem.Spacing.md)
+                .padding(.vertical, DesignSystem.Spacing.sm)
+                .background(
+                    RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                        .fill(DesignSystem.Colors.error.opacity(0.1))
+                        .overlay(
+                            RoundedRectangle(cornerRadius: DesignSystem.CornerRadius.md)
+                                .stroke(DesignSystem.Colors.error.opacity(0.2), lineWidth: 1)
+                        )
+                )
+            }
+            .buttonStyle(PlainButtonStyle())
+            
+            Button(action: onToggleFavorite) {
+                Image(systemName: "heart.fill")
+                    .font(.caption)
+                    .foregroundColor(DesignSystem.Colors.error)
+            }
+            .buttonStyle(PlainButtonStyle())
+        }
     }
 }
 
