@@ -6,8 +6,7 @@ struct HomeView: View {
     @State private var selectedCategory: NewsCategory? = nil
     @Binding var selectedTab: TabItem
     
-    // Mock data for trending topics and breaking news
-    @State private var trendingTopics: [TrendingTopic] = []
+    // Mock data for breaking news
     @State private var breakingNews: [NewsArticle] = []
     @State private var categoryArticles: [NewsCategory: [NewsArticle]] = [:]
     
@@ -42,94 +41,101 @@ struct HomeView: View {
                             )
                         }
                         
-                        // Hero Article
+                        // Minimalist Hero Article
                         if let heroArticle = viewModel.articles.first {
-                            HeroArticleCard(article: heroArticle) {
-                                // TODO: Navigate to article detail
+                            VStack(spacing: 0) {
+                                MinimalistSectionHeader(title: "Featured") {
+                                    // TODO: Navigate to featured articles
+                                }
+                                
+                                Divider()
+                                    .background(DesignSystem.Colors.border)
+                                
+                                MinimalistArticleCard(
+                                    article: heroArticle,
+                                    onTap: {
+                                        // TODO: Navigate to article detail
+                                    }
+                                )
                             }
+                            .background(Color(.systemBackground))
+                            .cornerRadius(DesignSystem.Spacing.sm)
+                            .shadow(color: DesignSystem.Colors.shadow, radius: 1, x: 0, y: 1)
                             .padding(.horizontal, DesignSystem.Spacing.md)
                         }
                         
-                        // Trending Topics
-                        if !trendingTopics.isEmpty {
-                            TrendingTopicsView(
-                                trendingTopics: trendingTopics,
-                                onTopicSelected: { topic in
-                                    // TODO: Filter articles by trending topic
-                                }
-                            )
-                        }
                         
-                        // Category Sections
-                        ForEach(NewsCategory.allCases.prefix(4), id: \.id) { category in
+                        // Minimalist Category Sections
+                        ForEach(NewsCategory.allCases.prefix(3), id: \.id) { category in
                             if let articles = categoryArticles[category], !articles.isEmpty {
-                                VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                                    CategorySectionHeader(
-                                        category: category,
-                                        articleCount: articles.count,
-                                        onSeeAll: {
-                                            selectedCategory = category
-                                            viewModel.fetchNewsByCategory(category)
-                                        }
-                                    )
+                                VStack(spacing: 0) {
+                                    // Minimalist category header
+                                    MinimalistSectionHeader(title: category.displayName) {
+                                        selectedCategory = category
+                                        viewModel.fetchNewsByCategory(category)
+                                    }
                                     
-                                    CategoryArticleGrid(
-                                        articles: Array(articles.prefix(5)),
-                                        onArticleTap: { article in
-                                            // TODO: Navigate to article detail
-                                        },
-                                        onLike: { article in
-                                            // TODO: Handle like action
-                                        },
-                                        onShare: { article in
-                                            // TODO: Handle share action
-                                        },
-                                        onBookmark: { article in
-                                            // TODO: Handle bookmark action
+                                    Divider()
+                                        .background(DesignSystem.Colors.border)
+                                    
+                                    // Minimalist compact articles
+                                    LazyVStack(spacing: 0) {
+                                        ForEach(Array(articles.prefix(3))) { article in
+                                            MinimalistCompactArticleCard(
+                                                article: article,
+                                                onTap: {
+                                                    // TODO: Navigate to article detail
+                                                }
+                                            )
+                                            
+                                            if article.id != articles.prefix(3).last?.id {
+                                                Divider()
+                                                    .background(DesignSystem.Colors.border)
+                                                    .padding(.horizontal, DesignSystem.Spacing.lg)
+                                            }
                                         }
-                                    )
+                                    }
                                 }
+                                .background(Color(.systemBackground))
+                                .cornerRadius(DesignSystem.Spacing.sm)
+                                .shadow(color: DesignSystem.Colors.shadow, radius: 1, x: 0, y: 1)
+                                .padding(.horizontal, DesignSystem.Spacing.md)
                             }
                         }
                         
-                        // Standard Article Feed
+                        // Minimalist Latest News Section
                         if selectedCategory == nil {
-                            VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
-                                HStack {
-                                    Image(systemName: "newspaper")
-                                        .font(.system(size: 16, weight: .medium))
-                                        .foregroundColor(DesignSystem.Colors.primary)
-                                    
-                                    Text("Latest News")
-                                        .font(DesignSystem.Typography.title3)
-                                        .fontWeight(.semibold)
-                                        .foregroundColor(DesignSystem.Colors.textPrimary)
-                                    
-                                    Spacer()
+                            VStack(spacing: 0) {
+                                // Minimalist section header
+                                MinimalistSectionHeader(title: "Latest News") {
+                                    // TODO: Navigate to all news
                                 }
-                                .padding(.horizontal, DesignSystem.Spacing.md)
                                 
-                                LazyVStack(spacing: DesignSystem.Spacing.sm) {
+                                Divider()
+                                    .background(DesignSystem.Colors.border)
+                                
+                                // Minimalist article list
+                                LazyVStack(spacing: 0) {
                                     ForEach(viewModel.articles.dropFirst()) { article in
-                                        StandardArticleCard(
+                                        MinimalistArticleCard(
                                             article: article,
                                             onTap: {
                                                 // TODO: Navigate to article detail
-                                            },
-                                            onLike: {
-                                                // TODO: Handle like action
-                                            },
-                                            onShare: {
-                                                // TODO: Handle share action
-                                            },
-                                            onBookmark: {
-                                                // TODO: Handle bookmark action
                                             }
                                         )
-                                        .padding(.horizontal, DesignSystem.Spacing.md)
+                                        
+                                        if article.id != viewModel.articles.dropFirst().last?.id {
+                                            Divider()
+                                                .background(DesignSystem.Colors.border)
+                                                .padding(.horizontal, DesignSystem.Spacing.lg)
+                                        }
                                     }
                                 }
                             }
+                            .background(Color(.systemBackground))
+                            .cornerRadius(DesignSystem.Spacing.sm)
+                            .shadow(color: DesignSystem.Colors.shadow, radius: 1, x: 0, y: 1)
+                            .padding(.horizontal, DesignSystem.Spacing.md)
                         }
                         
                         // Loading State
@@ -205,45 +211,6 @@ struct HomeView: View {
     }
     
     private func loadMockData() {
-        // Load trending topics
-        trendingTopics = [
-            TrendingTopic(
-                topic: "Artificial Intelligence",
-                category: .technology,
-                popularity: 95.5,
-                growth: 12.3,
-                articleCount: 42
-            ),
-            TrendingTopic(
-                topic: "Climate Change",
-                category: .world,
-                popularity: 88.2,
-                growth: 8.7,
-                articleCount: 28
-            ),
-            TrendingTopic(
-                topic: "Stock Market",
-                category: .business,
-                popularity: 76.8,
-                growth: -3.2,
-                articleCount: 35
-            ),
-            TrendingTopic(
-                topic: "Olympics 2024",
-                category: .sports,
-                popularity: 92.1,
-                growth: 15.6,
-                articleCount: 67
-            ),
-            TrendingTopic(
-                topic: "Healthcare Reform",
-                category: .health,
-                popularity: 71.3,
-                growth: 5.4,
-                articleCount: 23
-            )
-        ]
-        
         // Load breaking news
         breakingNews = [
             NewsArticle(
