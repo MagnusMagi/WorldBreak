@@ -204,11 +204,18 @@ extension View {
         return self.overlay(
             Group {
                 if isError {
-                    ErrorView(message: error, onRetry: retryAction)
-                        .background(Color.white)
-                        .cornerRadius(Constants.UI.CornerRadius.medium.rawValue)
-                        .shadow(Constants.UI.Shadow.medium)
-                        .padding()
+                    VStack {
+                        Text("Error: \(error)")
+                            .foregroundColor(.red)
+                        Button("Retry", action: retryAction)
+                            .padding()
+                            .background(Color.blue)
+                            .foregroundColor(.white)
+                            .cornerRadius(8)
+                    }
+                    .background(Color.white)
+                    .cornerRadius(8)
+                    .padding()
                 }
             }
         )

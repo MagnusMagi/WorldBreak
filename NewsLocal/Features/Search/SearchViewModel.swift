@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-/// ViewModel for SearchView managing search functionality and state
+/// Simplified ViewModel for SearchView managing basic search functionality
 @MainActor
 class SearchViewModel: ObservableObject {
     
@@ -19,13 +19,10 @@ class SearchViewModel: ObservableObject {
     @Published var searchText: String = ""
     @Published var searchResults: [NewsArticle] = []
     @Published var trendingTopics: [TrendingTopic] = []
-    @Published var searchSuggestions: [String] = []
     @Published var searchHistory: [String] = []
     @Published var isLoading: Bool = false
     @Published var hasSearched: Bool = false
     @Published var errorMessage: String?
-    @Published var filters: SearchFilters = SearchFilters()
-    @Published var showingFilters: Bool = false
     @Published var currentPage: Int = 1
     @Published var hasMoreResults: Bool = true
     @Published var totalResults: Int = 0
@@ -35,10 +32,7 @@ class SearchViewModel: ObservableObject {
     private var cancellables = Set<AnyCancellable>()
     private let newsService: NewsServiceProtocol
     private var searchWorkItem: DispatchWorkItem?
-    let searchHistoryManager = SearchHistoryManager()
-    let cacheManager = SearchCacheManager()
-    @Published var errorHandler = SearchErrorHandler()
-    let accessibilityManager = SearchAccessibilityManager()
+    private let searchHistoryManager = SimpleSearchHistoryManager()
     
     // MARK: - Initialization
     
@@ -47,7 +41,6 @@ class SearchViewModel: ObservableObject {
         loadSearchHistory()
         loadTrendingTopics()
         setupSearchTextObserver()
-        setupHistoryManagerObserver()
     }
     
     // MARK: - Public Methods
@@ -81,21 +74,10 @@ class SearchViewModel: ObservableObject {
         // Add to search history
         searchHistoryManager.addSearchQuery(searchText)
         
-        // Check cache first
-        if let cachedResponse = cacheManager.getCachedResults(for: searchText, filters: filters.isEmpty ? nil : filters) {
-            searchResults = cachedResponse.articles
-            totalResults = cachedResponse.totalResults
-            hasMoreResults = cachedResponse.hasMore
-            hasSearched = true
-            currentPage = cachedResponse.page
-            isLoading = false
-            return
-        }
-        
         // Perform search
         newsService.searchArticles(
             query: searchText,
-            filters: filters.isEmpty ? nil : filters,
+            filters: nil,
             page: currentPage,
             limit: 20
         )
@@ -104,7 +86,6 @@ class SearchViewModel: ObservableObject {
             receiveCompletion: { [weak self] completion in
                 self?.isLoading = false
                 if case .failure(let error) = completion {
-                    self?.errorHandler.handleError(error, context: .search)
                     self?.errorMessage = error.localizedDescription
                 }
             },
@@ -114,9 +95,6 @@ class SearchViewModel: ObservableObject {
                 self?.hasMoreResults = response.hasMore
                 self?.hasSearched = true
                 self?.currentPage = response.page
-                
-                // Cache the results
-                self?.cacheManager.cacheResults(response, for: self?.searchText ?? "", filters: self?.filters.isEmpty == false ? self?.filters : nil)
             }
         )
         .store(in: &cancellables)
@@ -131,7 +109,7 @@ class SearchViewModel: ObservableObject {
         
         newsService.searchArticles(
             query: searchText,
-            filters: filters.isEmpty ? nil : filters,
+            filters: nil,
             page: currentPage,
             limit: 20
         )
@@ -163,21 +141,6 @@ class SearchViewModel: ObservableObject {
         totalResults = 0
     }
     
-    /// Apply filters and refresh search
-    func applyFilters(_ newFilters: SearchFilters) {
-        filters = newFilters
-        if hasSearched {
-            performSearch()
-        }
-    }
-    
-    /// Clear all filters
-    func clearFilters() {
-        filters = SearchFilters()
-        if hasSearched {
-            performSearch()
-        }
-    }
     
     /// Search for trending topic
     func searchTrendingTopic(_ topic: TrendingTopic) {
@@ -198,98 +161,38 @@ class SearchViewModel: ObservableObject {
     
     // MARK: - Private Methods
     
-    /// Setup search text observer for suggestions
+    /// Setup search text observer for auto-search
     private func setupSearchTextObserver() {
         $searchText
-            .debounce(for: .milliseconds(300), scheduler: RunLoop.main)
+            .debounce(for: .milliseconds(500), scheduler: RunLoop.main)
             .removeDuplicates()
             .sink { [weak self] query in
-                self?.loadSearchSuggestions(for: query)
-            }
-            .store(in: &cancellables)
-    }
-    
-    /// Load search suggestions (public method)
-    func loadSearchSuggestions(for query: String) {
-        guard query.count >= 2 else {
-            // Show history-based suggestions for short queries
-            searchSuggestions = searchHistoryManager.getSearchSuggestions(for: query)
-            return
-        }
-        
-        // Check cache first
-        if let cachedSuggestions = cacheManager.getCachedSuggestions(for: query) {
-            let historySuggestions = searchHistoryManager.getSearchSuggestions(for: query)
-            let combinedSuggestions = Array(Set(cachedSuggestions + historySuggestions))
-            searchSuggestions = Array(combinedSuggestions.prefix(5))
-            return
-        }
-        
-        // Combine API suggestions with history-based suggestions
-        newsService.getSearchSuggestions(query: query)
-            .receive(on: DispatchQueue.main)
-            .sink(
-                receiveCompletion: { _ in },
-                receiveValue: { [weak self] apiSuggestions in
-                    let historySuggestions = self?.searchHistoryManager.getSearchSuggestions(for: query) ?? []
-                    let combinedSuggestions = Array(Set(apiSuggestions + historySuggestions))
-                    self?.searchSuggestions = Array(combinedSuggestions.prefix(5))
-                    
-                    // Cache the API suggestions
-                    self?.cacheManager.cacheSuggestions(apiSuggestions, for: query)
+                if !query.isEmpty {
+                    self?.performSearch()
                 }
-            )
+            }
             .store(in: &cancellables)
     }
     
     /// Load trending topics (public method)
     func loadTrendingTopics() {
-        // Check cache first
-        if let cachedTopics = cacheManager.getCachedTrendingTopics() {
-            trendingTopics = cachedTopics
-            return
-        }
-        
-        newsService.getTrendingTopics(limit: 10)
+        newsService.getTrendingTopics(limit: 6)
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveCompletion: { _ in },
                 receiveValue: { [weak self] topics in
                     self?.trendingTopics = topics
-                    self?.cacheManager.cacheTrendingTopics(topics)
                 }
             )
             .store(in: &cancellables)
     }
     
-    /// Setup history manager observer
-    private func setupHistoryManagerObserver() {
-        searchHistoryManager.$searchHistory
-            .map { $0.map { $0.query } }
-            .assign(to: \SearchViewModel.searchHistory, on: self)
-            .store(in: &cancellables)
-        
-        searchHistoryManager.$recentSearches
-            .assign(to: \SearchViewModel.searchHistory, on: self)
-            .store(in: &cancellables)
-    }
-    
-    /// Load search history from SearchHistoryManager
+    /// Load search history from SimpleSearchHistoryManager
     private func loadSearchHistory() {
         searchHistory = searchHistoryManager.getRecentSearches()
     }
     
     // MARK: - Computed Properties
-    
-    /// Check if there are active filters
-    var hasActiveFilters: Bool {
-        return !filters.isEmpty
-    }
-    
-    /// Get active filter count
-    var activeFilterCount: Int {
-        return filters.activeFilterCount
-    }
     
     /// Check if search is empty
     var isSearchEmpty: Bool {
