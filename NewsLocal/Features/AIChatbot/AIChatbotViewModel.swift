@@ -9,11 +9,13 @@ class AIChatbotViewModel: ObservableObject {
     @Published var isTyping = false
     @Published var errorMessage: String?
     
+    private let openAIService = OpenAIService()
     private let chatHistoryManager = ChatHistoryManager()
     private var cancellables = Set<AnyCancellable>()
     
     init() {
         setupObservers()
+        initializeAPIKey()
     }
     
     /// Send a message to the AI assistant
@@ -31,9 +33,33 @@ class AIChatbotViewModel: ObservableObject {
         // Show typing indicator
         isTyping = true
         
-        // Simulate AI response (for demo purposes)
-        DispatchQueue.main.asyncAfter(deadline: .now() + 2.0) {
-            self.handleAIResponse(self.generateMockResponse(for: text))
+        // Check if API key is available
+        let apiKeyManager = APIKeyManager()
+        if apiKeyManager.hasAPIKey() {
+            // Send to OpenAI
+            openAIService.sendMessage(text, context: getNewsContext())
+                .receive(on: DispatchQueue.main)
+                .sink(
+                    receiveCompletion: { [weak self] completion in
+                        self?.isTyping = false
+                        
+                        if case .failure(let error) = completion {
+                            self?.errorMessage = error.localizedDescription
+                            self?.handleError(error)
+                        }
+                    },
+                    receiveValue: { [weak self] response in
+                        self?.isTyping = false
+                        self?.handleAIResponse(response)
+                    }
+                )
+                .store(in: &cancellables)
+        } else {
+            // Use mock response if no API key
+            DispatchQueue.main.asyncAfter(deadline: .now() + 1.5) {
+                self.isTyping = false
+                self.handleAIResponse(self.generateMockResponse(for: text))
+            }
         }
     }
     
@@ -60,9 +86,12 @@ class AIChatbotViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    private func initializeAPIKey() {
+        let apiKeyManager = APIKeyManager()
+        apiKeyManager.initializeWithDefaultKey()
+    }
+    
     private func handleAIResponse(_ response: String) {
-        self.isTyping = false
-        
         let aiMessage = ChatMessage(
             id: UUID(),
             content: response,
@@ -74,20 +103,48 @@ class AIChatbotViewModel: ObservableObject {
         chatHistoryManager.saveMessage(aiMessage)
     }
     
+    private func handleError(_ error: Error) {
+        let errorMessage = ChatMessage(
+            id: UUID(),
+            content: "Üzgünüm, bir hata oluştu. Lütfen tekrar deneyin. 😔",
+            isUser: false,
+            timestamp: Date()
+        )
+        
+        messages.append(errorMessage)
+    }
+    
     private func generateMockResponse(for userMessage: String) -> String {
         let lowercasedMessage = userMessage.lowercased()
         
-        if lowercasedMessage.contains("top news") || lowercasedMessage.contains("bugün") {
-            return "Here are today's top news stories:\n\n1. Breaking: Major tech company announces new AI breakthrough\n2. Economic update: Markets show positive trends\n3. Global events: International summit concludes successfully\n\nWould you like me to elaborate on any of these topics?"
-        } else if lowercasedMessage.contains("search") || lowercasedMessage.contains("ara") {
-            return "I can help you search for news! What specific topic or keyword would you like to search for? I can find the latest articles, analyze trends, or provide summaries on any subject."
-        } else if lowercasedMessage.contains("summary") || lowercasedMessage.contains("özet") {
-            return "I'd be happy to provide a news summary! Based on current events, here's what's happening:\n\n• Technology sector showing strong growth\n• International relations remain stable\n• Economic indicators point to continued recovery\n\nIs there a particular area you'd like me to focus on for a more detailed summary?"
-        } else if lowercasedMessage.contains("trending") || lowercasedMessage.contains("popüler") {
-            return "Current trending topics include:\n\n🔥 Artificial Intelligence developments\n🔥 Climate change initiatives\n🔥 Space exploration news\n🔥 Economic policy updates\n\nWhich trending topic interests you most? I can provide detailed information on any of these areas."
+        if lowercasedMessage.contains("bugün") || lowercasedMessage.contains("top news") {
+            return "📰 Bugünün öne çıkan haberleri:\n\n• Teknoloji sektöründe yeni AI gelişmeleri 🚀\n• Ekonomik göstergeler olumlu seyir gösteriyor 📈\n• Uluslararası ilişkilerde önemli gelişmeler 🌍\n\nHangi konuda daha detaylı bilgi almak istersiniz?"
+        } else if lowercasedMessage.contains("ara") || lowercasedMessage.contains("search") {
+            return "🔍 Haber arama konusunda size yardımcı olabilirim! \n\nHangi konu veya anahtar kelime ile ilgili haberleri aramak istiyorsunuz? Size en güncel makaleleri, trend analizlerini veya özetleri bulabilirim."
+        } else if lowercasedMessage.contains("özet") || lowercasedMessage.contains("summary") {
+            return "📊 Güncel haber özeti:\n\n• Teknoloji sektörü güçlü büyüme gösteriyor 💻\n• Uluslararası ilişkiler istikrarlı durumda 🤝\n• Ekonomik göstergeler toparlanma işareti veriyor 💰\n\nDaha detaylı özet için hangi alanı odak almak istersiniz?"
+        } else if lowercasedMessage.contains("popüler") || lowercasedMessage.contains("trending") {
+            return "🌟 Şu anda popüler konular:\n\n🔥 Yapay zeka gelişmeleri\n🔥 İklim değişikliği girişimleri\n🔥 Uzay araştırmaları\n🔥 Ekonomik politika güncellemeleri\n\nHangi popüler konu hakkında detaylı bilgi almak istersiniz?"
         } else {
-            return "I understand you're asking about: \"\(userMessage)\"\n\nAs your AI news assistant, I can help you with:\n• Latest news updates\n• Topic summaries\n• Trend analysis\n• News search assistance\n\nHow can I assist you with news-related information today?"
+            return "Merhaba! 👋 NewsLocal AI asistanınızım.\n\nSize şu konularda yardımcı olabilirim:\n• 📰 Güncel haber güncellemeleri\n• 📊 Konu özetleri\n• 🔍 Trend analizleri\n• 🌟 Popüler konular\n\nHangi konuda yardıma ihtiyacınız var?"
         }
+    }
+    
+    private func getNewsContext() -> String {
+        // Get current news context for better AI responses
+        return """
+        Sen Türkçe konuşan bir haber asistanısın. NewsLocal uygulaması için çalışıyorsun.
+        
+        Görevlerin:
+        - Haberler hakkında akıllı yanıtlar ver
+        - Güncel olayları analiz et ve özetle
+        - Kullanıcıların sorularını anla ve yardımcı ol
+        - Türkçe ve İngilizce destekle
+        - Kısa, net ve faydalı yanıtlar ver
+        - Emoji kullanarak yanıtlarını daha çekici yap
+        
+        Yanıtların 2-3 paragrafı geçmesin ve her zaman yardımcı olmaya odaklan.
+        """
     }
 }
 
