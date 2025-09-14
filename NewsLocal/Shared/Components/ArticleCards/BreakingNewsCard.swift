@@ -17,7 +17,7 @@ struct BreakingNewsCard: View {
     
     var body: some View {
         Button(action: onTap) {
-            VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.md) {
                 // Header with Breaking News Badge
                 HStack {
                     HStack(spacing: DesignSystem.Spacing.xs) {
@@ -64,9 +64,10 @@ struct BreakingNewsCard: View {
                     }
                     .buttonStyle(PlainButtonStyle())
                 }
+                .padding(.horizontal, DesignSystem.Spacing.xs)
                 
                 // Content
-                HStack(alignment: .top, spacing: DesignSystem.Spacing.md) {
+                HStack(alignment: .top, spacing: DesignSystem.Spacing.lg) {
                     // Image
                     AsyncImage(url: article.imageUrl) { image in
                         image
@@ -86,7 +87,7 @@ struct BreakingNewsCard: View {
                     .cornerRadius(DesignSystem.Spacing.xs)
                     
                     // Text Content
-                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+                    VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                         // Category
                         HStack(spacing: DesignSystem.Spacing.xs) {
                             Image(systemName: article.category.icon)
@@ -112,6 +113,7 @@ struct BreakingNewsCard: View {
                             .foregroundColor(DesignSystem.Colors.textPrimary)
                             .lineLimit(3)
                             .multilineTextAlignment(.leading)
+                            .padding(.vertical, DesignSystem.Spacing.xs)
                         
                         // Source and Time
                         HStack {
@@ -133,12 +135,14 @@ struct BreakingNewsCard: View {
                                 .font(DesignSystem.Typography.xs)
                                 .foregroundColor(DesignSystem.Colors.textTertiary)
                         }
+                        .padding(.top, DesignSystem.Spacing.xs)
                     }
                 }
+                .padding(.horizontal, DesignSystem.Spacing.xs)
             }
         }
         .buttonStyle(PlainButtonStyle())
-        .padding(DesignSystem.Spacing.md)
+        .padding(DesignSystem.Spacing.lg)
         .background(
             RoundedRectangle(cornerRadius: DesignSystem.Spacing.md)
                 .fill(Color(.systemBackground))

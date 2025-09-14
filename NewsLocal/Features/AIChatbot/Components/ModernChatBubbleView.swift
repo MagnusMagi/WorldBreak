@@ -212,7 +212,7 @@ struct AIAvatarView: View {
             sparkleRotation = 360
             pulseScale = isTyping ? 1.2 : 1.0
         }
-        .onChange(of: isTyping) { typing in
+        .onChange(of: isTyping) { _, typing in
             withAnimation(.easeInOut(duration: 0.3)) {
                 pulseScale = typing ? 1.2 : 1.0
             }

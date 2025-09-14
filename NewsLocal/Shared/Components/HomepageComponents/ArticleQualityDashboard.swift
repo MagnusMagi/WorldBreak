@@ -159,7 +159,7 @@ struct DetailedMetricsView: View {
                     title: "Breaking News",
                     value: "\(metrics.breakingNewsCount)",
                     target: "3-5",
-                    current: metrics.breakingNewsCount,
+                    current: Double(metrics.breakingNewsCount),
                     range: 3...5
                 )
                 
@@ -260,7 +260,7 @@ struct MetricRow: View {
 // MARK: - Article Validation View
 
 struct ArticleValidationView: View {
-    let validationResult: HomepageArticleStandards.ArticleValidationResult
+    let validationResult: ArticleValidationResult
     
     var body: some View {
         VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {

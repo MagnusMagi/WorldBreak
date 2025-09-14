@@ -207,9 +207,9 @@ struct FeedArticlesSection: View {
                         onTap: {
                             onArticleTap(article)
                         },
-                        onLike: { _ in },
-                        onShare: { _ in },
-                        onBookmark: { _ in }
+                        onLike: { },
+                        onShare: { },
+                        onBookmark: { }
                     )
                     .padding(.horizontal, DesignSystem.Spacing.md)
                 }

@@ -43,28 +43,41 @@ class HomepageArticleManager: ObservableObject {
         isLoading = true
         error = nil
         
-        Task {
-            do {
-                let articles = try await fetchAllArticles()
-                await organizeArticles(articles)
-                isLoading = false
-            } catch {
-                self.error = error as? AppError ?? AppError.unknown
-                isLoading = false
-            }
-        }
+        fetchAllArticles()
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    self?.isLoading = false
+                    if case .failure(let error) = completion {
+                        self?.error = error as? AppError ?? AppError.unknown("Failed to load articles")
+                    }
+                },
+                receiveValue: { [weak self] articles in
+                    Task { @MainActor in
+                        await self?.organizeArticles(articles)
+                    }
+                }
+            )
+            .store(in: &cancellables)
     }
     
     /// Refreshes specific section
     func refreshSection(_ placement: HomepageArticleStandards.ArticlePlacement) {
-        Task {
-            do {
-                let articles = try await fetchArticlesForPlacement(placement)
-                await updateSection(placement, with: articles)
-            } catch {
-                self.error = error as? AppError ?? AppError.unknown
-            }
-        }
+        fetchArticlesForPlacement(placement)
+            .receive(on: DispatchQueue.main)
+            .sink(
+                receiveCompletion: { [weak self] completion in
+                    if case .failure(let error) = completion {
+                        self?.error = error as? AppError ?? AppError.unknown("Failed to refresh section")
+                    }
+                },
+                receiveValue: { [weak self] articles in
+                    Task { @MainActor in
+                        await self?.updateSection(placement, with: articles)
+                    }
+                }
+            )
+            .store(in: &cancellables)
     }
     
     /// Gets articles for a specific placement
@@ -89,48 +102,49 @@ class HomepageArticleManager: ObservableObject {
     }
     
     /// Validates article quality
-    func validateArticle(_ article: NewsArticle) -> HomepageArticleStandards.ArticleValidationResult {
+    func validateArticle(_ article: NewsArticle) -> ArticleValidationResult {
         return HomepageArticleStandards.validateArticle(article)
     }
     
     // MARK: - Private Methods
     
-    private func fetchAllArticles() async throws -> [NewsArticle] {
-        return try await withThrowingTaskGroup(of: [NewsArticle].self) { group in
-            // Fetch articles for each category
-            for category in NewsCategory.allCases {
-                group.addTask {
-                    try await self.newsService.fetchTopHeadlines(category: category).async()
-                }
-            }
-            
-            // Fetch general headlines
-            group.addTask {
-                try await self.newsService.fetchTopHeadlines(category: nil).async()
-            }
-            
-            var allArticles: [NewsArticle] = []
-            
-            for try await articles in group {
-                allArticles.append(contentsOf: articles)
-            }
-            
-            return allArticles
+    private func fetchAllArticles() -> AnyPublisher<[NewsArticle], Error> {
+        let categoryPublishers = NewsCategory.allCases.map { category in
+            newsService.fetchTopHeadlines(category: category)
+                .mapError { $0 as Error }
         }
+        
+        let generalPublisher = newsService.fetchTopHeadlines(category: nil)
+            .mapError { $0 as Error }
+        
+        let allPublishers = categoryPublishers + [generalPublisher]
+        
+        return Publishers.MergeMany(allPublishers)
+            .collect()
+            .map { articleArrays in
+                articleArrays.flatMap { $0 }
+            }
+            .eraseToAnyPublisher()
     }
     
-    private func fetchArticlesForPlacement(_ placement: HomepageArticleStandards.ArticlePlacement) async throws -> [NewsArticle] {
+    private func fetchArticlesForPlacement(_ placement: HomepageArticleStandards.ArticlePlacement) -> AnyPublisher<[NewsArticle], Error> {
         switch placement {
         case .hero, .breaking, .trending, .feed:
-            return try await newsService.fetchTopHeadlines(category: nil).async()
+            return newsService.fetchTopHeadlines(category: nil)
+                .mapError { $0 as Error }
+                .eraseToAnyPublisher()
         case .category:
-            // Fetch for all categories
-            var articles: [NewsArticle] = []
-            for category in NewsCategory.allCases {
-                let categoryArticles = try await newsService.fetchTopHeadlines(category: category).async()
-                articles.append(contentsOf: categoryArticles)
+            let categoryPublishers = NewsCategory.allCases.map { category in
+                newsService.fetchTopHeadlines(category: category)
+                    .mapError { $0 as Error }
             }
-            return articles
+            
+            return Publishers.MergeMany(categoryPublishers)
+                .collect()
+                .map { articleArrays in
+                    articleArrays.flatMap { $0 }
+                }
+                .eraseToAnyPublisher()
         }
     }
     
@@ -292,28 +306,3 @@ struct HomepageQualityMetrics {
     }
 }
 
-// MARK: - Publisher Extensions
-
-extension Publisher where Output == [NewsArticle], Failure == Error {
-    func async() async throws -> [NewsArticle] {
-        return try await withCheckedThrowingContinuation { continuation in
-            var cancellable: AnyCancellable?
-            cancellable = self
-                .sink(
-                    receiveCompletion: { completion in
-                        switch completion {
-                        case .finished:
-                            break
-                        case .failure(let error):
-                            continuation.resume(throwing: error)
-                        }
-                        cancellable?.cancel()
-                    },
-                    receiveValue: { articles in
-                        continuation.resume(returning: articles)
-                        cancellable?.cancel()
-                    }
-                )
-        }
-    }
-}

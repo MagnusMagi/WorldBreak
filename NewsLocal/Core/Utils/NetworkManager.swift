@@ -187,20 +187,18 @@ extension NetworkError {
     }
     
     static func fromDecodingError(_ decodingError: DecodingError) -> NetworkError {
-        let message: String
         switch decodingError {
         case .typeMismatch(let type, let context):
-            message = "Type mismatch for \(type): \(context.debugDescription)"
+            return .decodingError
         case .valueNotFound(let type, let context):
-            message = "Value not found for \(type): \(context.debugDescription)"
+            return .decodingError
         case .keyNotFound(let key, let context):
-            message = "Key not found: \(key) - \(context.debugDescription)"
+            return .decodingError
         case .dataCorrupted(let context):
-            message = "Data corrupted: \(context.debugDescription)"
+            return .decodingError
         @unknown default:
-            message = "Unknown decoding error"
+            return .decodingError
         }
-        return .decodingError
     }
 }
 

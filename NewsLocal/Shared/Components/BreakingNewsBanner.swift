@@ -41,8 +41,8 @@ struct BreakingNewsBanner: View {
                         }
                     }
                 }
-                .padding(.horizontal, DesignSystem.Spacing.md)
-                .padding(.vertical, DesignSystem.Spacing.sm)
+                .padding(.horizontal, DesignSystem.Spacing.lg)
+                .padding(.vertical, DesignSystem.Spacing.md)
                 .background(DesignSystem.Colors.breakingNews.opacity(0.1))
                 
                 // Breaking news content
@@ -93,7 +93,7 @@ struct BreakingNewsItem: View {
     var body: some View {
         Button(action: onTap) {
             HStack {
-                VStack(alignment: .leading, spacing: 4) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
                     Text(article.title)
                         .font(DesignSystem.Typography.body)
                         .fontWeight(.semibold)
@@ -120,7 +120,8 @@ struct BreakingNewsItem: View {
                     .font(.caption)
                     .foregroundColor(DesignSystem.Colors.textTertiary)
             }
-            .padding(.horizontal, DesignSystem.Spacing.md)
+            .padding(.horizontal, DesignSystem.Spacing.lg)
+            .padding(.vertical, DesignSystem.Spacing.sm)
         }
         .buttonStyle(PlainButtonStyle())
     }

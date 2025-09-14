@@ -71,7 +71,7 @@ struct ReadingProgressView: View {
                     animatedProgress = progress
                 }
             }
-            .onChange(of: progress) { newProgress in
+            .onChange(of: progress) { _, newProgress in
                 withAnimation(.easeInOut(duration: 0.3)) {
                     animatedProgress = newProgress
                 }
