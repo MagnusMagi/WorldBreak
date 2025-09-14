@@ -43,13 +43,12 @@ struct StandardHeader: View {
                 // Optional action buttons (can be customized per page)
                 if title == "Home" {
                     HStack(spacing: 16) {
-                        Button(action: {
-                            print("✨ Sparkle button tapped!")
-                        }) {
+                        NavigationLink(destination: AIChatbotView()) {
                             Image(systemName: "sparkle")
                                 .font(.title2)
                                 .foregroundColor(.primary)
                         }
+                        .buttonStyle(PlainButtonStyle())
                         
                         Button(action: {
                             print("🔔 Notifications button tapped!")
