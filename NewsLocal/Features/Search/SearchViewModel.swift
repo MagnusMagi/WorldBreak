@@ -36,6 +36,7 @@ class SearchViewModel: ObservableObject {
     private let newsService: NewsServiceProtocol
     private var searchWorkItem: DispatchWorkItem?
     let searchHistoryManager = SearchHistoryManager()
+    let cacheManager = SearchCacheManager()
     
     // MARK: - Initialization
     
@@ -78,6 +79,17 @@ class SearchViewModel: ObservableObject {
         // Add to search history
         searchHistoryManager.addSearchQuery(searchText)
         
+        // Check cache first
+        if let cachedResponse = cacheManager.getCachedResults(for: searchText, filters: filters.isEmpty ? nil : filters) {
+            searchResults = cachedResponse.articles
+            totalResults = cachedResponse.totalResults
+            hasMoreResults = cachedResponse.hasMore
+            hasSearched = true
+            currentPage = cachedResponse.page
+            isLoading = false
+            return
+        }
+        
         // Perform search
         newsService.searchArticles(
             query: searchText,
@@ -99,6 +111,9 @@ class SearchViewModel: ObservableObject {
                 self?.hasMoreResults = response.hasMore
                 self?.hasSearched = true
                 self?.currentPage = response.page
+                
+                // Cache the results
+                self?.cacheManager.cacheResults(response, for: self?.searchText ?? "", filters: self?.filters.isEmpty == false ? self?.filters : nil)
             }
         )
         .store(in: &cancellables)
@@ -199,6 +214,14 @@ class SearchViewModel: ObservableObject {
             return
         }
         
+        // Check cache first
+        if let cachedSuggestions = cacheManager.getCachedSuggestions(for: query) {
+            let historySuggestions = searchHistoryManager.getSearchSuggestions(for: query)
+            let combinedSuggestions = Array(Set(cachedSuggestions + historySuggestions))
+            searchSuggestions = Array(combinedSuggestions.prefix(5))
+            return
+        }
+        
         // Combine API suggestions with history-based suggestions
         newsService.getSearchSuggestions(query: query)
             .receive(on: DispatchQueue.main)
@@ -208,6 +231,9 @@ class SearchViewModel: ObservableObject {
                     let historySuggestions = self?.searchHistoryManager.getSearchSuggestions(for: query) ?? []
                     let combinedSuggestions = Array(Set(apiSuggestions + historySuggestions))
                     self?.searchSuggestions = Array(combinedSuggestions.prefix(5))
+                    
+                    // Cache the API suggestions
+                    self?.cacheManager.cacheSuggestions(apiSuggestions, for: query)
                 }
             )
             .store(in: &cancellables)
@@ -215,12 +241,19 @@ class SearchViewModel: ObservableObject {
     
     /// Load trending topics (public method)
     func loadTrendingTopics() {
+        // Check cache first
+        if let cachedTopics = cacheManager.getCachedTrendingTopics() {
+            trendingTopics = cachedTopics
+            return
+        }
+        
         newsService.getTrendingTopics(limit: 10)
             .receive(on: DispatchQueue.main)
             .sink(
                 receiveCompletion: { _ in },
                 receiveValue: { [weak self] topics in
                     self?.trendingTopics = topics
+                    self?.cacheManager.cacheTrendingTopics(topics)
                 }
             )
             .store(in: &cancellables)
