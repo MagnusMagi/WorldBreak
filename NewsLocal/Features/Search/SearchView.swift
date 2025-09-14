@@ -98,6 +98,23 @@ struct SearchView: View {
             // Load trending topics and search history when view appears
             viewModel.loadTrendingTopics()
         }
+        .alert("Search Error", isPresented: $viewModel.errorHandler.showingErrorAlert) {
+            Button("OK") {
+                viewModel.errorHandler.clearError()
+            }
+            
+            if let action = viewModel.errorHandler.errorAction {
+                Button("Retry") {
+                    action()
+                    viewModel.errorHandler.clearError()
+                }
+            }
+        } message: {
+            Text(viewModel.errorHandler.errorMessage)
+        }
+        .accessibilityElement(children: .contain)
+        .accessibilityLabel("Search screen")
+        .accessibilityHint("Search for news articles using text, voice, or images")
     }
 }
 

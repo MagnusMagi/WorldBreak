@@ -41,6 +41,8 @@ struct SearchBarView: View {
                         .onChange(of: searchText) { _ in
                             showSuggestions = !searchText.isEmpty
                         }
+                        .accessibilityLabel("Search text field")
+                        .accessibilityHint("Enter search terms for news articles")
                     
                     // Voice Search Button
                     if let onVoiceSearch = onVoiceSearch {
@@ -51,6 +53,8 @@ struct SearchBarView: View {
                             Image(systemName: "mic.fill")
                                 .foregroundColor(DesignSystem.Colors.primary)
                         }
+                        .accessibilityLabel("Voice search")
+                        .accessibilityHint("Start voice search to speak your query")
                     }
                     
                     // Image Search Button
@@ -62,6 +66,8 @@ struct SearchBarView: View {
                             Image(systemName: "camera.fill")
                                 .foregroundColor(DesignSystem.Colors.primary)
                         }
+                        .accessibilityLabel("Image search")
+                        .accessibilityHint("Search using images from camera or photo library")
                     }
                     
                     if !searchText.isEmpty {

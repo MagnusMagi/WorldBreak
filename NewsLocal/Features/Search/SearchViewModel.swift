@@ -37,6 +37,8 @@ class SearchViewModel: ObservableObject {
     private var searchWorkItem: DispatchWorkItem?
     let searchHistoryManager = SearchHistoryManager()
     let cacheManager = SearchCacheManager()
+    let errorHandler = SearchErrorHandler()
+    let accessibilityManager = SearchAccessibilityManager()
     
     // MARK: - Initialization
     
@@ -102,6 +104,7 @@ class SearchViewModel: ObservableObject {
             receiveCompletion: { [weak self] completion in
                 self?.isLoading = false
                 if case .failure(let error) = completion {
+                    self?.errorHandler.handleError(error, context: .search)
                     self?.errorMessage = error.localizedDescription
                 }
             },
