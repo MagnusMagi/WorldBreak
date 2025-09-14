@@ -68,7 +68,12 @@ struct ReadingHistoryView: View {
                 
                 // Articles list
                 if viewModel.recentArticles.isEmpty {
-                    EmptyStateView()
+                    EmptyStateView(
+                        title: "No Reading History",
+                        message: "Start reading articles to see your history here",
+                        actionTitle: nil,
+                        action: nil
+                    )
                 } else {
                     ScrollView {
                         LazyVStack(spacing: 12) {
@@ -156,7 +161,7 @@ struct ReadingHistoryItem: View {
                     .foregroundColor(.primary)
                     .lineLimit(2)
                 
-                Text(article.source)
+                Text(article.source.name)
                     .font(.caption)
                     .foregroundColor(.secondary)
                 
@@ -189,29 +194,7 @@ struct ReadingHistoryItem: View {
     }
 }
 
-struct EmptyStateView: View {
-    var body: some View {
-        VStack(spacing: 16) {
-            Image(systemName: "book.closed")
-                .font(.system(size: 48))
-                .foregroundColor(.secondary)
-            
-            VStack(spacing: 8) {
-                Text("No Reading History")
-                    .font(.headline)
-                    .fontWeight(.semibold)
-                    .foregroundColor(.primary)
-                
-                Text("Start reading articles to see your history here")
-                    .font(.subheadline)
-                    .foregroundColor(.secondary)
-                    .multilineTextAlignment(.center)
-            }
-        }
-        .frame(maxWidth: .infinity, maxHeight: .infinity)
-        .padding(.horizontal, 40)
-    }
-}
+// EmptyStateView moved to View+Extensions.swift
 
 // MARK: - Extensions
 

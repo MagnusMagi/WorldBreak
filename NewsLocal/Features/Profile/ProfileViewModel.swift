@@ -10,7 +10,7 @@ import Foundation
 import SwiftUI
 import Combine
 
-/// ViewModel for ProfileView managing user data and statistics
+/// Simplified ViewModel for ProfileView managing user data and statistics
 @MainActor
 class ProfileViewModel: ObservableObject {
     
@@ -21,6 +21,7 @@ class ProfileViewModel: ObservableObject {
     @Published var errorMessage: String?
     @Published var recentArticles: [NewsArticle] = []
     @Published var savedArticles: [NewsArticle] = []
+    @Published var likedArticles: [NewsArticle] = []
     
     // MARK: - Private Properties
     
@@ -32,8 +33,7 @@ class ProfileViewModel: ObservableObject {
     init(newsService: NewsServiceProtocol = ServiceFactory.shared.newsService) {
         self.newsService = newsService
         loadUserData()
-        loadRecentArticles()
-        loadSavedArticles()
+        loadArticleData()
     }
     
     // MARK: - Public Methods
@@ -51,12 +51,19 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
+    /// Load all article data
+    func loadArticleData() {
+        loadRecentArticles()
+        loadSavedArticles()
+        loadLikedArticles()
+    }
+    
     /// Load recent articles
     func loadRecentArticles() {
         newsService.getRecentArticles(limit: 5)
             .receive(on: DispatchQueue.main)
             .sink(
-                receiveCompletion: { [weak self] completion in
+                receiveCompletion: { [weak self] (completion: Subscribers.Completion<AppError>) in
                     if case .failure(let error) = completion {
                         self?.errorMessage = error.localizedDescription
                     }
@@ -73,7 +80,7 @@ class ProfileViewModel: ObservableObject {
         newsService.getSavedArticles(limit: 5)
             .receive(on: DispatchQueue.main)
             .sink(
-                receiveCompletion: { [weak self] completion in
+                receiveCompletion: { [weak self] (completion: Subscribers.Completion<AppError>) in
                     if case .failure(let error) = completion {
                         self?.errorMessage = error.localizedDescription
                     }
@@ -85,11 +92,19 @@ class ProfileViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
+    /// Load liked articles
+    func loadLikedArticles() {
+        // TODO: Implement liked articles service
+        // For now, use mock data
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.3) {
+            self.likedArticles = []
+        }
+    }
+    
     /// Refresh all data
     func refreshData() {
         loadUserData()
-        loadRecentArticles()
-        loadSavedArticles()
+        loadArticleData()
     }
     
     /// Sign out user
@@ -146,21 +161,21 @@ class ProfileViewModel: ObservableObject {
         }
     }
     
-    /// Reading level color
+    /// Reading level color using Design System
     var readingLevelColor: Color {
         let articlesRead = user.statistics.articlesRead
         
         switch articlesRead {
         case 0..<10:
-            return .orange
+            return DesignSystem.Colors.warning
         case 10..<50:
-            return .blue
+            return DesignSystem.Colors.primary
         case 50..<100:
-            return .purple
+            return DesignSystem.Colors.info
         case 100..<200:
-            return .green
+            return DesignSystem.Colors.success
         default:
-            return .red
+            return DesignSystem.Colors.error
         }
     }
 }

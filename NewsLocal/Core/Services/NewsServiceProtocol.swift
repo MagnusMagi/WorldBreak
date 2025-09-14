@@ -107,6 +107,16 @@ protocol NewsServiceProtocol {
     
     // MARK: - User Interactions
     
+    /// Get recent articles for user
+    /// - Parameter limit: Maximum number of articles to fetch
+    /// - Returns: Publisher that emits array of NewsArticle or AppError
+    func getRecentArticles(limit: Int) -> AnyPublisher<[NewsArticle], AppError>
+    
+    /// Get saved articles for user
+    /// - Parameter limit: Maximum number of articles to fetch
+    /// - Returns: Publisher that emits array of NewsArticle or AppError
+    func getSavedArticles(limit: Int) -> AnyPublisher<[NewsArticle], AppError>
+    
     /// Like an article
     /// - Parameter articleId: ID of the article to like
     /// - Returns: Publisher that emits success status

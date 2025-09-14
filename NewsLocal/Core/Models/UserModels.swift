@@ -75,6 +75,7 @@ struct UserPreferences: Codable, Equatable {
     var language: String
     var country: String
     var timezone: String
+    var bio: String?
     
     // MARK: - Initializers
     
@@ -87,7 +88,8 @@ struct UserPreferences: Codable, Equatable {
         privacy: PrivacyPreferences = PrivacyPreferences(),
         language: String = "en",
         country: String = "US",
-        timezone: String = "UTC"
+        timezone: String = "UTC",
+        bio: String? = nil
     ) {
         self.categories = categories
         self.sources = sources
@@ -98,6 +100,7 @@ struct UserPreferences: Codable, Equatable {
         self.language = language
         self.country = country
         self.timezone = timezone
+        self.bio = bio
     }
 }
 

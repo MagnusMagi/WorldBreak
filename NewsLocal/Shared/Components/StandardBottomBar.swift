@@ -82,41 +82,7 @@ struct TabButton: View {
     }
 }
 
-// MARK: - Tab Item Enum
-
-enum TabItem: String, CaseIterable {
-    case home = "home"
-    case search = "search"
-    case categories = "categories"
-    case profile = "profile"
-    
-    var title: String {
-        switch self {
-        case .home: return "Home"
-        case .search: return "Search"
-        case .categories: return "Categories"
-        case .profile: return "Profile"
-        }
-    }
-    
-    var icon: String {
-        switch self {
-        case .home: return "house"
-        case .search: return "magnifyingglass"
-        case .categories: return "list.bullet"
-        case .profile: return "person"
-        }
-    }
-    
-    var selectedIcon: String {
-        switch self {
-        case .home: return "house.fill"
-        case .search: return "magnifyingglass"
-        case .categories: return "list.bullet"
-        case .profile: return "person.fill"
-        }
-    }
-}
+// MARK: - Tab Item Enum moved to ContentView.swift
 
 // MARK: - Preview
 

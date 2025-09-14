@@ -1,205 +1,195 @@
 import SwiftUI
 
+/// Standardized ProfileView with Header, BottomBar and Design System integration
 struct ProfileView: View {
     @Binding var selectedTab: TabItem
     @StateObject private var viewModel = ProfileViewModel()
     @State private var showingReadingHistory = false
     @State private var showingSettings = false
     @State private var showingEditProfile = false
+    @State private var showingNotificationSettings = false
+    @State private var showingThemeSettings = false
+    @State private var showingPrivacySettings = false
+    @State private var showingHelpSupport = false
+    @State private var showingAbout = false
     
     var body: some View {
-        NavigationView {
-            StandardPageWrapper(
-                title: "Profile",
-                showCategories: false,
-                selectedCategory: nil,
-                selectedTab: selectedTab,
-                onCategorySelected: { _ in },
-                onTabSelected: { tab in
-                    selectedTab = tab
+        ProfilePageWrapper(
+            title: "Profile",
+            selectedTab: selectedTab,
+            onTabSelected: { tab in
+                selectedTab = tab
+            }
+        ) {
+            List {
+                // Profile Header Section
+                Section {
+                    ProfileHeader(
+                        user: viewModel.user,
+                        readingLevel: viewModel.readingLevel,
+                        readingLevelColor: viewModel.readingLevelColor,
+                        onEditProfile: {
+                            showingEditProfile = true
+                        }
+                    )
                 }
-            ) {
-                ScrollView {
-                    VStack(spacing: 24) {
-                        // Profile Header
-                        VStack(spacing: 16) {
-                            // Profile Image
-                            AsyncImage(url: viewModel.user.profileImageUrl) { image in
-                                image
-                                    .resizable()
-                                    .aspectRatio(contentMode: .fill)
-                            } placeholder: {
-                                Circle()
-                                    .fill(.blue.opacity(0.1))
-                                    .overlay(
-                                        Image(systemName: "person.fill")
-                                            .font(.system(size: 40, weight: .medium))
-                                            .foregroundColor(.blue)
-                                    )
-                            }
-                            .frame(width: 100, height: 100)
-                            .clipShape(Circle())
-                            
-                            VStack(spacing: 4) {
-                                Text(viewModel.user.name)
-                                    .font(.title2)
-                                    .fontWeight(.semibold)
-                                    .foregroundColor(.primary)
-                                
-                                Text(viewModel.user.email)
-                                    .font(.subheadline)
-                                    .foregroundColor(.secondary)
-                                
-                                // Reading Level Badge
-                                HStack(spacing: 4) {
-                                    Circle()
-                                        .fill(viewModel.readingLevelColor)
-                                        .frame(width: 8, height: 8)
-                                    
-                                    Text(viewModel.readingLevel)
-                                        .font(.caption)
-                                        .fontWeight(.medium)
-                                        .foregroundColor(viewModel.readingLevelColor)
-                                }
-                                .padding(.horizontal, 12)
-                                .padding(.vertical, 4)
-                                .background(
-                                    Capsule()
-                                        .fill(viewModel.readingLevelColor.opacity(0.1))
-                                )
-                            }
-                        }
-                        .padding(.top, 20)
-                        
-                        // Statistics Cards
-                        VStack(spacing: 16) {
-                            HStack(spacing: 12) {
-                                StatisticsCard(
-                                    title: "Articles Read",
-                                    value: "\(viewModel.user.statistics.articlesRead)",
-                                    icon: "book.fill",
-                                    color: .blue
-                                )
-                                
-                                StatisticsCard(
-                                    title: "Liked",
-                                    value: "\(viewModel.user.statistics.articlesLiked)",
-                                    icon: "heart.fill",
-                                    color: .red
-                                )
-                            }
-                            
-                            HStack(spacing: 12) {
-                                StatisticsCard(
-                                    title: "Saved",
-                                    value: "\(viewModel.user.statistics.articlesShared)",
-                                    icon: "bookmark.fill",
-                                    color: .green
-                                )
-                                
-                                StatisticsCard(
-                                    title: "Streak",
-                                    value: "\(viewModel.user.statistics.readingStreak) days",
-                                    icon: "flame.fill",
-                                    color: .orange,
-                                    subtitle: "Keep it up!"
-                                )
-                            }
-                        }
-                        
-                        // Quick Access Section
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Quick Access")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 4)
-                            
-                            HStack(spacing: 12) {
-                                QuickAccessButton(
-                                    icon: "clock.fill",
-                                    title: "Recent",
-                                    count: viewModel.recentArticles.count,
-                                    color: .blue
-                                ) {
-                                    showingReadingHistory = true
-                                }
-                                
-                                QuickAccessButton(
-                                    icon: "bookmark.fill",
-                                    title: "Saved",
-                                    count: viewModel.savedArticles.count,
-                                    color: .green
-                                ) {
-                                    print("💾 Saved articles tapped!")
-                                }
-                                
-                                QuickAccessButton(
-                                    icon: "heart.fill",
-                                    title: "Liked",
-                                    count: viewModel.user.statistics.articlesLiked,
-                                    color: .red
-                                ) {
-                                    print("❤️ Liked articles tapped!")
-                                }
-                            }
-                        }
-                        
-                        // Profile Options
-                        VStack(alignment: .leading, spacing: 12) {
-                            Text("Settings")
-                                .font(.headline)
-                                .fontWeight(.semibold)
-                                .foregroundColor(.primary)
-                                .padding(.horizontal, 4)
-                            
-                            VStack(spacing: 12) {
-                                ProfileOptionRow(
-                                    icon: "person.circle",
-                                    title: "Edit Profile",
-                                    action: {
-                                        showingEditProfile = true
-                                    }
-                                )
-                            
-                            ProfileOptionRow(
-                                icon: "bell",
-                                title: "Notifications",
-                                action: {
-                                    print("🔔 Profile Notifications tapped!")
-                                }
-                            )
-                            
-                            ProfileOptionRow(
-                                icon: "gear",
-                                title: "Settings",
-                                action: {
-                                    showingSettings = true
-                                }
-                            )
-                            
-                            ProfileOptionRow(
-                                icon: "questionmark.circle",
-                                title: "Help & Support",
-                                action: {
-                                    print("❓ Help & Support tapped!")
-                                }
-                            )
-                            
-                            ProfileOptionRow(
-                                icon: "info.circle",
-                                title: "About",
-                                action: {
-                                    print("ℹ️ About tapped!")
-                                }
-                            )
-                        }
-                        
-                        // Bottom padding for bottombar
-                        Color.clear.frame(height: 100)
+                
+                // Statistics Section
+                Section(header: ProfileSectionHeader(title: "Statistics", icon: "chart.bar.fill", color: DesignSystem.Colors.primary)) {
+                    StatisticsRow(
+                        icon: "book.fill",
+                        title: "Articles Read",
+                        value: "\(viewModel.user.statistics.articlesRead)",
+                        color: DesignSystem.Colors.primary
+                    )
+                    
+                    StatisticsRow(
+                        icon: "heart.fill",
+                        title: "Liked Articles",
+                        value: "\(viewModel.user.statistics.articlesLiked)",
+                        color: DesignSystem.Colors.error
+                    )
+                    
+                    StatisticsRow(
+                        icon: "bookmark.fill",
+                        title: "Saved Articles",
+                        value: "\(viewModel.user.statistics.articlesShared)",
+                        color: DesignSystem.Colors.success
+                    )
+                    
+                    StatisticsRow(
+                        icon: "flame.fill",
+                        title: "Reading Streak",
+                        value: "\(viewModel.user.statistics.readingStreak) days",
+                        color: DesignSystem.Colors.warning
+                    )
+                    
+                    StatisticsRow(
+                        icon: "clock.fill",
+                        title: "Time Spent",
+                        value: viewModel.formattedTimeSpent,
+                        color: DesignSystem.Colors.info
+                    )
+                }
+                
+                // Quick Access Section
+                Section(header: ProfileSectionHeader(title: "Quick Access", icon: "bolt.fill", color: DesignSystem.Colors.warning)) {
+                    ProfileListItem(
+                        icon: "clock.fill",
+                        title: "Reading History",
+                        subtitle: "View your recent articles",
+                        badge: "\(viewModel.recentArticles.count)",
+                        color: DesignSystem.Colors.primary
+                    ) {
+                        showingReadingHistory = true
                     }
-                    .padding(.horizontal, 20)
+                    
+                    ProfileListItem(
+                        icon: "heart.fill",
+                        title: "Liked Articles",
+                        subtitle: "Articles you've liked",
+                        badge: "\(viewModel.user.statistics.articlesLiked)",
+                        color: DesignSystem.Colors.error
+                    ) {
+                        // TODO: Implement liked articles view
+                        print("❤️ Liked articles tapped!")
+                    }
+                    
+                    ProfileListItem(
+                        icon: "bookmark.fill",
+                        title: "Saved Articles",
+                        subtitle: "Your bookmarked articles",
+                        badge: "\(viewModel.user.statistics.articlesShared)",
+                        color: DesignSystem.Colors.success
+                    ) {
+                        // TODO: Implement saved articles view
+                        print("💾 Saved articles tapped!")
+                    }
+                    
+                    ProfileListItem(
+                        icon: "magnifyingglass",
+                        title: "Search History",
+                        subtitle: "Your recent searches",
+                        color: DesignSystem.Colors.info
+                    ) {
+                        // TODO: Implement search history view
+                        print("🔍 Search history tapped!")
+                    }
                 }
+                
+                // Account Section
+                Section(header: ProfileSectionHeader(title: "Account", icon: "person.circle.fill", color: DesignSystem.Colors.primary)) {
+                    ProfileListItem(
+                        icon: "person.circle",
+                        title: "Edit Profile",
+                        subtitle: "Update your personal information",
+                        color: DesignSystem.Colors.primary
+                    ) {
+                        showingEditProfile = true
+                    }
+                    
+                    ProfileListItem(
+                        icon: "bell.fill",
+                        title: "Notifications",
+                        subtitle: "Manage your notification preferences",
+                        color: DesignSystem.Colors.warning
+                    ) {
+                        showingNotificationSettings = true
+                    }
+                    
+                    ProfileListItem(
+                        icon: "paintbrush.fill",
+                        title: "Appearance",
+                        subtitle: "Theme and display settings",
+                        color: DesignSystem.Colors.info
+                    ) {
+                        showingThemeSettings = true
+                    }
+                    
+                    ProfileListItem(
+                        icon: "lock.fill",
+                        title: "Privacy & Security",
+                        subtitle: "Data sharing and privacy controls",
+                        color: DesignSystem.Colors.success
+                    ) {
+                        showingPrivacySettings = true
+                    }
+                }
+                
+                // Support Section
+                Section(header: ProfileSectionHeader(title: "Support", icon: "questionmark.circle.fill", color: DesignSystem.Colors.warning)) {
+                    ProfileListItem(
+                        icon: "questionmark.circle",
+                        title: "Help & Support",
+                        subtitle: "Get help and contact support",
+                        color: DesignSystem.Colors.warning
+                    ) {
+                        showingHelpSupport = true
+                    }
+                    
+                    ProfileListItem(
+                        icon: "info.circle",
+                        title: "About",
+                        subtitle: "App version and information",
+                        color: DesignSystem.Colors.secondary
+                    ) {
+                        showingAbout = true
+                    }
+                    
+                    ProfileListItem(
+                        icon: "star.fill",
+                        title: "Rate App",
+                        subtitle: "Rate NewsLocal on the App Store",
+                        color: DesignSystem.Colors.accent
+                    ) {
+                        // TODO: Implement app rating
+                        print("⭐ Rate app tapped!")
+                    }
+                }
+            }
+            .listStyle(InsetGroupedListStyle())
+            .refreshable {
+                viewModel.refreshData()
             }
         }
         .sheet(isPresented: $showingReadingHistory) {
@@ -211,43 +201,25 @@ struct ProfileView: View {
         .sheet(isPresented: $showingEditProfile) {
             EditProfileView()
         }
+        .sheet(isPresented: $showingNotificationSettings) {
+            NotificationSettingsView()
+        }
+        .sheet(isPresented: $showingThemeSettings) {
+            ThemeSettingsView()
+        }
+        .sheet(isPresented: $showingPrivacySettings) {
+            PrivacySettingsView()
+        }
+        .sheet(isPresented: $showingHelpSupport) {
+            HelpSupportView()
+        }
+        .sheet(isPresented: $showingAbout) {
+            AboutView()
+        }
     }
 }
 
-struct ProfileOptionRow: View {
-    let icon: String
-    let title: String
-    let action: () -> Void
-    
-    var body: some View {
-        Button(action: action) {
-            HStack(spacing: 16) {
-                Image(systemName: icon)
-                    .font(.system(size: 20, weight: .medium))
-                    .foregroundColor(.blue)
-                    .frame(width: 24, height: 24)
-                
-                Text(title)
-                    .font(.body)
-                    .fontWeight(.medium)
-                    .foregroundColor(.primary)
-                
-                Spacer()
-                
-                Image(systemName: "chevron.right")
-                    .font(.system(size: 14, weight: .medium))
-                    .foregroundColor(.secondary)
-            }
-            .padding(.horizontal, 16)
-            .padding(.vertical, 12)
-            .background(
-                RoundedRectangle(cornerRadius: 12)
-                    .fill(Color(.secondarySystemBackground))
-            )
-        }
-        .buttonStyle(PlainButtonStyle())
-    }
-}
+// MARK: - Preview
 
 struct ProfileView_Previews: PreviewProvider {
     static var previews: some View {

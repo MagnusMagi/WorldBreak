@@ -224,6 +224,22 @@ class MockNewsService: NewsServiceProtocol {
     
     // MARK: - User Interactions
     
+    func getRecentArticles(limit: Int) -> AnyPublisher<[NewsArticle], AppError> {
+        let recentArticles = Array(mockArticles.prefix(limit))
+        return Just(recentArticles)
+            .setFailureType(to: AppError.self)
+            .delay(for: .seconds(0.2), scheduler: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
+    func getSavedArticles(limit: Int) -> AnyPublisher<[NewsArticle], AppError> {
+        let savedArticles = Array(mockArticles.prefix(limit))
+        return Just(savedArticles)
+            .setFailureType(to: AppError.self)
+            .delay(for: .seconds(0.2), scheduler: DispatchQueue.main)
+            .eraseToAnyPublisher()
+    }
+    
     func likeArticle(id articleId: String) -> AnyPublisher<Bool, AppError> {
         return Just(true)
             .setFailureType(to: AppError.self)

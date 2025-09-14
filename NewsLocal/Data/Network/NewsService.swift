@@ -188,6 +188,26 @@ class NewsService: NewsServiceProtocol {
     
     // MARK: - User Interactions
     
+    func getRecentArticles(limit: Int) -> AnyPublisher<[NewsArticle], AppError> {
+        guard let url = APIEndpoints.buildURL(APIEndpoints.User.readingHistory, parameters: ["limit": "\(limit)"]) else {
+            return Fail(error: AppError.network(.invalidURL))
+                .eraseToAnyPublisher()
+        }
+        
+        return networkManager.request([NewsArticle].self, from: url, method: .get)
+            .eraseToAnyPublisher()
+    }
+    
+    func getSavedArticles(limit: Int) -> AnyPublisher<[NewsArticle], AppError> {
+        guard let url = APIEndpoints.buildURL(APIEndpoints.User.bookmarks, parameters: ["limit": "\(limit)"]) else {
+            return Fail(error: AppError.network(.invalidURL))
+                .eraseToAnyPublisher()
+        }
+        
+        return networkManager.request([NewsArticle].self, from: url, method: .get)
+            .eraseToAnyPublisher()
+    }
+    
     func likeArticle(id articleId: String) -> AnyPublisher<Bool, AppError> {
         guard let url = URL(string: APIEndpoints.News.detail + "/\(articleId)/like") else {
             return Fail(error: AppError.network(.invalidURL))
