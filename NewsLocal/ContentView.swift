@@ -5,7 +5,7 @@ import Combine
 enum TabItem: CaseIterable {
     case home
     case search
-    case categories
+    case notifications
     case profile
     
     var title: String {
@@ -14,8 +14,8 @@ enum TabItem: CaseIterable {
             return "Home"
         case .search:
             return "Search"
-        case .categories:
-            return "Categories"
+        case .notifications:
+            return "Notifications"
         case .profile:
             return "Profile"
         }
@@ -27,8 +27,8 @@ enum TabItem: CaseIterable {
             return "house"
         case .search:
             return "magnifyingglass"
-        case .categories:
-            return "list.bullet"
+        case .notifications:
+            return "bell"
         case .profile:
             return "person"
         }
@@ -40,8 +40,8 @@ enum TabItem: CaseIterable {
             return "house.fill"
         case .search:
             return "magnifyingglass"
-        case .categories:
-            return "list.bullet"
+        case .notifications:
+            return "bell.fill"
         case .profile:
             return "person.fill"
         }
@@ -59,8 +59,8 @@ struct ContentView: View {
                 HomeView(selectedTab: $selectedTab)
             case .search:
                 SearchView(selectedTab: $selectedTab)
-            case .categories:
-                CategoriesView(selectedTab: $selectedTab)
+            case .notifications:
+                NotificationsView(selectedTab: $selectedTab)
             case .profile:
                 ProfileView(selectedTab: $selectedTab)
             }
