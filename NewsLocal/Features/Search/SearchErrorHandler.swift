@@ -182,25 +182,20 @@ enum SearchError: LocalizedError, Identifiable {
             switch appError {
             case .network(let networkError):
                 switch networkError {
-                case .noConnection:
+                case .noInternet, .networkUnavailable:
                     return .networkError
-                case .timeout:
+                case .timeout, .requestTimeout:
                     return .networkError
                 case .serverError(let code):
                     return .serverError(code)
-                default:
-                    return .networkError
-                }
-            case .api(let apiError):
-                switch apiError {
                 case .invalidResponse:
                     return .serverError(500)
                 case .decodingError:
                     return .serverError(500)
                 default:
-                    return .serverError(500)
+                    return .networkError
                 }
-            default:
+            case .validation, .storage, .authenticationFailed, .notAuthenticated, .unknown:
                 return .unknown(error)
             }
         }

@@ -32,7 +32,9 @@ class SearchAccessibilityManager: ObservableObject {
     }
     
     deinit {
-        removeAccessibilityObservers()
+        Task { @MainActor in
+            removeAccessibilityObservers()
+        }
     }
     
     // MARK: - Public Methods
@@ -95,7 +97,7 @@ class SearchAccessibilityManager: ObservableObject {
     
     /// Get appropriate animation duration based on accessibility settings
     func getAnimationDuration() -> Double {
-        return isReduceMotionEnabled ? 0.0 : DesignSystem.Animation.quick
+        return isReduceMotionEnabled ? 0.0 : 0.3 // Default animation duration
     }
     
     /// Get appropriate corner radius based on accessibility settings
@@ -157,7 +159,9 @@ class SearchAccessibilityManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.updateAccessibilitySettings()
+            Task { @MainActor in
+                self?.updateAccessibilitySettings()
+            }
         }
         
         let reduceMotionObserver = NotificationCenter.default.addObserver(
@@ -165,7 +169,9 @@ class SearchAccessibilityManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.updateAccessibilitySettings()
+            Task { @MainActor in
+                self?.updateAccessibilitySettings()
+            }
         }
         
         let reduceTransparencyObserver = NotificationCenter.default.addObserver(
@@ -173,7 +179,9 @@ class SearchAccessibilityManager: ObservableObject {
             object: nil,
             queue: .main
         ) { [weak self] _ in
-            self?.updateAccessibilitySettings()
+            Task { @MainActor in
+                self?.updateAccessibilitySettings()
+            }
         }
         
         accessibilityObservers = [voiceOverObserver, reduceMotionObserver, reduceTransparencyObserver]
@@ -192,9 +200,8 @@ class SearchAccessibilityManager: ObservableObject {
         isReduceTransparencyEnabled = UIAccessibility.isReduceTransparencyEnabled
         
         // Get current content size category
-        if let contentSizeCategory = UIApplication.shared.preferredContentSizeCategory {
-            preferredContentSizeCategory = ContentSizeCategory(contentSizeCategory)
-        }
+        let contentSizeCategory = UIApplication.shared.preferredContentSizeCategory
+        preferredContentSizeCategory = ContentSizeCategory(contentSizeCategory)
     }
 }
 

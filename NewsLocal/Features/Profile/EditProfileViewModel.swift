@@ -101,7 +101,7 @@ class EditProfileViewModel: ObservableObject {
         selectedPhoto.loadTransferable(type: Data.self) { result in
             switch result {
             case .success(let data):
-                if let data = data {
+                if data != nil {
                     // TODO: Upload image to server and get URL
                     // For now, just update the local URL
                     DispatchQueue.main.async {

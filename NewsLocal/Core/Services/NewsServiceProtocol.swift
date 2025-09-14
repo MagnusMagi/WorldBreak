@@ -234,7 +234,7 @@ extension NewsServiceProtocol {
     /// Fetch top headlines with optional category filter (Async)
     func fetchTopHeadlines(category: NewsCategory? = nil) async throws -> [NewsArticle] {
         try await withCheckedThrowingContinuation { continuation in
-            fetchTopHeadlines(category: category)
+            let cancellable = fetchTopHeadlines(category: category)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -245,13 +245,15 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: articles)
                     }
                 )
+            // Store the cancellable to prevent deallocation
+            _ = cancellable
         }
     }
     
     /// Fetch breaking news articles (Async)
     func fetchBreakingNews() async throws -> [NewsArticle] {
         try await withCheckedThrowingContinuation { continuation in
-            fetchBreakingNews()
+            let cancellable = fetchBreakingNews()
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -262,13 +264,14 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: articles)
                     }
                 )
+            _ = cancellable
         }
     }
     
     /// Fetch trending news articles (Async)
     func fetchTrendingNews(limit: Int? = nil) async throws -> [NewsArticle] {
         try await withCheckedThrowingContinuation { continuation in
-            fetchTrendingNews(limit: limit)
+            let cancellable = fetchTrendingNews(limit: limit)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -279,13 +282,14 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: articles)
                     }
                 )
+            _ = cancellable
         }
     }
     
     /// Get a specific article by ID (Async)
     func getArticle(id: String) async throws -> NewsArticle {
         try await withCheckedThrowingContinuation { continuation in
-            getArticle(id: id)
+            let cancellable = getArticle(id: id)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -296,6 +300,7 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: article)
                     }
                 )
+            _ = cancellable
         }
     }
     
@@ -307,7 +312,7 @@ extension NewsServiceProtocol {
         limit: Int = 20
     ) async throws -> NewsResponse {
         try await withCheckedThrowingContinuation { continuation in
-            searchArticles(query: query, filters: filters, page: page, limit: limit)
+            let cancellable = searchArticles(query: query, filters: filters, page: page, limit: limit)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -318,13 +323,14 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: response)
                     }
                 )
+            _ = cancellable
         }
     }
     
     /// Like an article (Async)
     func likeArticle(id articleId: String) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
-            likeArticle(id: articleId)
+            let cancellable = likeArticle(id: articleId)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -335,13 +341,14 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: success)
                     }
                 )
+            _ = cancellable
         }
     }
     
     /// Share an article (Async)
     func shareArticle(id articleId: String, platform: String? = nil) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
-            shareArticle(id: articleId, platform: platform)
+            let cancellable = shareArticle(id: articleId, platform: platform)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -352,13 +359,14 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: success)
                     }
                 )
+            _ = cancellable
         }
     }
     
     /// Track article view for analytics (Async)
     func trackArticleView(id articleId: String) async throws -> Bool {
         try await withCheckedThrowingContinuation { continuation in
-            trackArticleView(id: articleId)
+            let cancellable = trackArticleView(id: articleId)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -369,13 +377,14 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: success)
                     }
                 )
+            _ = cancellable
         }
     }
     
     /// Fetch categories (Async)
     func fetchCategories() async throws -> [NewsCategory] {
         try await withCheckedThrowingContinuation { continuation in
-            fetchCategories()
+            let cancellable = fetchCategories()
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -386,13 +395,14 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: categories)
                     }
                 )
+            _ = cancellable
         }
     }
     
     /// Fetch sources (Async)
     func fetchSources() async throws -> [NewsSource] {
         try await withCheckedThrowingContinuation { continuation in
-            fetchSources()
+            let cancellable = fetchSources()
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -403,6 +413,7 @@ extension NewsServiceProtocol {
                         continuation.resume(returning: sources)
                     }
                 )
+            _ = cancellable
         }
     }
 }

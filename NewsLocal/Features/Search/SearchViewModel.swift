@@ -37,7 +37,7 @@ class SearchViewModel: ObservableObject {
     private var searchWorkItem: DispatchWorkItem?
     let searchHistoryManager = SearchHistoryManager()
     let cacheManager = SearchCacheManager()
-    let errorHandler = SearchErrorHandler()
+    @Published var errorHandler = SearchErrorHandler()
     let accessibilityManager = SearchAccessibilityManager()
     
     // MARK: - Initialization
@@ -266,11 +266,11 @@ class SearchViewModel: ObservableObject {
     private func setupHistoryManagerObserver() {
         searchHistoryManager.$searchHistory
             .map { $0.map { $0.query } }
-            .assign(to: \.searchHistory, on: self)
+            .assign(to: \SearchViewModel.searchHistory, on: self)
             .store(in: &cancellables)
         
         searchHistoryManager.$recentSearches
-            .assign(to: \.searchHistory, on: self)
+            .assign(to: \SearchViewModel.searchHistory, on: self)
             .store(in: &cancellables)
     }
     

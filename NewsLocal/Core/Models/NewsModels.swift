@@ -336,12 +336,14 @@ struct SearchFilters: Codable, Equatable {
     
     // MARK: - Sort Options
     
-    enum SortOption: String, Codable, CaseIterable {
+    enum SortOption: String, Codable, CaseIterable, Identifiable {
         case publishedAt = "published_at"
         case relevance = "relevance"
         case popularity = "popularity"
         case viewCount = "view_count"
         case likeCount = "like_count"
+        
+        var id: String { rawValue }
         
         var displayName: String {
             switch self {

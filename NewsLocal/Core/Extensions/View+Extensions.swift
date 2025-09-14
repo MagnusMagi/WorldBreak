@@ -204,7 +204,7 @@ extension View {
         return self.overlay(
             Group {
                 if isError {
-                    ErrorView(message: error, retryAction: retryAction)
+                    ErrorView(message: error, onRetry: retryAction)
                         .background(Color.white)
                         .cornerRadius(Constants.UI.CornerRadius.medium.rawValue)
                         .shadow(Constants.UI.Shadow.medium)
@@ -257,11 +257,11 @@ extension View {
         isActive: Bool,
         destination: Destination
     ) -> some View {
-        return NavigationLink(
-            destination: destination,
-            isActive: .constant(isActive)
-        ) {
+        return NavigationLink(value: isActive) {
             self
+        }
+        .navigationDestination(isPresented: .constant(isActive)) {
+            destination
         }
     }
     
@@ -274,11 +274,11 @@ extension View {
         isActive: Binding<Bool>,
         destination: Destination
     ) -> some View {
-        return NavigationLink(
-            destination: destination,
-            isActive: isActive
-        ) {
+        return NavigationLink(value: isActive.wrappedValue) {
             self
+        }
+        .navigationDestination(isPresented: isActive) {
+            destination
         }
     }
     
@@ -328,7 +328,7 @@ extension View {
 
 // MARK: - Helper Views
 
-struct ErrorView: View {
+struct GenericErrorView: View {
     let message: String
     let retryAction: () -> Void
     

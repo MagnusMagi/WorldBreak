@@ -447,8 +447,9 @@ struct Constants {
     
     struct Environment {
         static let isDebug = _isDebugAssertConfiguration()
-        static let isTestFlight = Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt" // TODO: Update to use StoreKit 2
-        static let isAppStore = Bundle.main.appStoreReceiptURL?.lastPathComponent == "receipt" // TODO: Update to use StoreKit 2
+        // TODO: Update to use StoreKit 2 - AppTransaction.shared
+        static let isTestFlight = false // Bundle.main.appStoreReceiptURL?.lastPathComponent == "sandboxReceipt"
+        static let isAppStore = false // Bundle.main.appStoreReceiptURL?.lastPathComponent == "receipt"
         static let isSimulator: Bool = {
             #if targetEnvironment(simulator)
             return true

@@ -35,6 +35,10 @@ struct DesignSystem {
         static let error = Color.red
         static let info = Color.blue
         
+        // UI Element Colors
+        static let border = Color(.separator)
+        static let shadow = Color.black.opacity(0.1)
+        
         // Breaking News
         static let breakingNews = Color.red
         

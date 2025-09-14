@@ -15,7 +15,7 @@ class SearchHistoryManager: ObservableObject {
     
     // MARK: - Published Properties
     
-    @Published var searchHistory: [SearchHistoryItem] = []
+    @Published var searchHistory: [NewsLocal.SearchHistoryItem] = []
     @Published var favoriteSearches: [String] = []
     @Published var recentSearches: [String] = []
     
@@ -121,7 +121,7 @@ class SearchHistoryManager: ObservableObject {
     }
     
     /// Get trending searches from history
-    func getTrendingSearches(limit: Int = 10) -> [SearchHistoryItem] {
+    func getTrendingSearches(limit: Int = 10) -> [NewsLocal.SearchHistoryItem] {
         return Array(searchHistory
             .sorted { $0.searchCount > $1.searchCount }
             .prefix(limit))
@@ -176,7 +176,7 @@ class SearchHistoryManager: ObservableObject {
     /// Load search history from UserDefaults
     private func loadSearchHistory() {
         if let data = userDefaults.data(forKey: searchHistoryKey),
-           let history = try? JSONDecoder().decode([SearchHistoryItem].self, from: data) {
+           let history = try? JSONDecoder().decode([NewsLocal.SearchHistoryItem].self, from: data) {
             searchHistory = history
         }
     }
@@ -222,6 +222,13 @@ struct SearchHistoryItem: Identifiable, Codable, Equatable {
     let category: String?
     let timestamp: Date
     var searchCount: Int
+    
+    init(query: String, category: String?, timestamp: Date, searchCount: Int) {
+        self.query = query
+        self.category = category
+        self.timestamp = timestamp
+        self.searchCount = searchCount
+    }
     
     enum CodingKeys: String, CodingKey {
         case query, category, timestamp, searchCount

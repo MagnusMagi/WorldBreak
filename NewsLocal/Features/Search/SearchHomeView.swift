@@ -132,7 +132,7 @@ struct SearchHistorySection: View {
             
             VStack(spacing: DesignSystem.Spacing.sm) {
                 ForEach(viewModel.searchHistory.prefix(5), id: \.self) { query in
-                    SearchHistoryItem(
+                    SearchHistoryItemView(
                         query: query,
                         onSearch: {
                             viewModel.searchFromHistory(query)
@@ -218,7 +218,7 @@ struct TrendingTopicCard: View {
     }
 }
 
-struct SearchHistoryItem: View {
+struct SearchHistoryItemView: View {
     let query: String
     let onSearch: () -> Void
     let onToggleFavorite: () -> Void

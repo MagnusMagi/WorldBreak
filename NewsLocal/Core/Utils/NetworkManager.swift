@@ -67,7 +67,7 @@ class NetworkManager: NetworkManagerProtocol {
     // MARK: - Network Monitoring
     
     private func setupNetworkMonitoring() {
-        networkMonitor.pathUpdateHandler = { [weak self] path in
+        networkMonitor.pathUpdateHandler = { path in
             DispatchQueue.main.async {
                 if path.status == .satisfied {
                     print("Network connection is available")
@@ -365,7 +365,7 @@ extension NetworkManagerProtocol {
         body: Data? = nil
     ) async throws -> T {
         try await withCheckedThrowingContinuation { continuation in
-            request(type, from: url, method: method, headers: headers, body: body)
+            let cancellable = request(type, from: url, method: method, headers: headers, body: body)
                 .sink(
                     receiveCompletion: { completion in
                         if case .failure(let error) = completion {
@@ -376,6 +376,7 @@ extension NetworkManagerProtocol {
                         continuation.resume(returning: value)
                     }
                 )
+            _ = cancellable
         }
     }
 }

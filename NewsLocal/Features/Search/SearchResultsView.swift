@@ -19,7 +19,7 @@ struct SearchResultsView: View {
             
             // Results Content
             if viewModel.isLoading && viewModel.searchResults.isEmpty {
-                LoadingView()
+                LoadingView(message: "Searching...", style: .spinner)
             } else if let errorMessage = viewModel.errorMessage {
                 ErrorView(message: errorMessage) {
                     viewModel.performSearch()
@@ -107,7 +107,9 @@ struct SearchResultsList: View {
         ScrollView {
             LazyVStack(spacing: DesignSystem.Spacing.md) {
                 ForEach(viewModel.searchResults) { article in
-                    NewsCardView(article: article)
+                    NewsCardView(article: article) {
+                        // Handle article tap
+                    }
                         .onAppear {
                             // Load more when reaching near the end
                             if article == viewModel.searchResults.last {
