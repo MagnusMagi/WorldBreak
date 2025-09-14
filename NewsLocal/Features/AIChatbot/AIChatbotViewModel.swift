@@ -80,7 +80,7 @@ class AIChatbotViewModel: ObservableObject {
         // Handle error messages
         $errorMessage
             .compactMap { $0 }
-            .sink { [weak self] error in
+            .sink { error in
                 print("AI Chatbot Error: \(error)")
             }
             .store(in: &cancellables)

@@ -227,7 +227,7 @@ struct NewsCategory: Identifiable, Codable, Equatable, Hashable, CaseIterable {
 // MARK: - News Source Model
 
 /// Represents a news source with credibility information
-struct NewsSource: Identifiable, Codable, Equatable {
+struct NewsSource: Identifiable, Codable, Equatable, Hashable {
     let id: String
     let name: String
     let description: String

@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Combine
 
 /// Infinite scroll component with loading indicators
 struct InfiniteScrollView<Content: View>: View {
@@ -153,52 +154,6 @@ struct LoadingStateView: View {
     }
 }
 
-struct EmptyStateView: View {
-    let title: String
-    let message: String
-    let actionTitle: String?
-    let action: (() -> Void)?
-    
-    var body: some View {
-        VStack(spacing: DesignSystem.Spacing.lg) {
-            // Empty state icon
-            Image(systemName: "newspaper")
-                .font(.system(size: 64, weight: .light))
-                .foregroundColor(DesignSystem.Colors.textTertiary)
-            
-            // Empty state content
-            VStack(spacing: DesignSystem.Spacing.sm) {
-                Text(title)
-                    .font(DesignSystem.Typography.title3)
-                    .fontWeight(.semibold)
-                    .foregroundColor(DesignSystem.Colors.textPrimary)
-                
-                Text(message)
-                    .font(DesignSystem.Typography.body)
-                    .foregroundColor(DesignSystem.Colors.textSecondary)
-                    .multilineTextAlignment(.center)
-            }
-            
-            // Action button
-            if let actionTitle = actionTitle, let action = action {
-                Button(action: action) {
-                    Text(actionTitle)
-                        .font(DesignSystem.Typography.body)
-                        .fontWeight(.medium)
-                        .foregroundColor(DesignSystem.Colors.primary)
-                        .padding(.horizontal, DesignSystem.Spacing.lg)
-                        .padding(.vertical, DesignSystem.Spacing.sm)
-                        .background(
-                            Capsule()
-                                .fill(DesignSystem.Colors.primary.opacity(0.1))
-                        )
-                }
-            }
-        }
-        .frame(maxWidth: .infinity)
-        .padding(.vertical, DesignSystem.Spacing.xl)
-    }
-}
 
 // MARK: - Preview
 

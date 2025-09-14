@@ -48,7 +48,7 @@ struct AIChatbotView: View {
                         endPoint: .bottom
                     )
                 )
-                .onChange(of: viewModel.isTyping) { isTyping in
+                .onChange(of: viewModel.isTyping) { _, isTyping in
                     if isTyping {
                         // Only scroll to typing indicator when AI is typing
                         DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {

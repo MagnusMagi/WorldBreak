@@ -287,12 +287,12 @@ struct SearchAndFilterView_Previews: PreviewProvider {
         VStack {
             SearchAndFilterView(
                 searchText: .constant(""),
-                selectedCategories: .constant([]),
-                selectedSources: .constant([]),
-                sortOption: .constant(.publishedAt),
-                sortOrder: .constant(.descending),
-                dateFrom: .constant(nil),
-                dateTo: .constant(nil),
+                selectedCategories: .constant(Set<NewsCategory>()),
+                selectedSources: .constant(Set<NewsSource>()),
+                sortOption: .constant(SearchFilters.SortOption.publishedAt),
+                sortOrder: .constant(SearchFilters.SortOrder.descending),
+                dateFrom: .constant(nil as Date?),
+                dateTo: .constant(nil as Date?),
                 onSearch: {},
                 onClearFilters: {}
             )
