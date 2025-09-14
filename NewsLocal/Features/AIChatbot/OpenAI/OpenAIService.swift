@@ -1,7 +1,7 @@
 import Foundation
 import Combine
 
-/// Service for interacting with OpenAI GPT-4o API
+/// Service for interacting with OpenAI GPT-3.5-turbo API
 class OpenAIService: ObservableObject {
     private let apiKeyManager = APIKeyManager()
     private let baseURL = "https://api.openai.com/v1/chat/completions"
@@ -54,7 +54,7 @@ class OpenAIService: ObservableObject {
         """
         
         let requestBody = OpenAIRequest(
-            model: "gpt-4o",
+            model: "gpt-3.5-turbo",
             messages: [
                 OpenAIMessage(role: "system", content: systemMessage),
                 OpenAIMessage(role: "user", content: message)

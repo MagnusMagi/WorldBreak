@@ -7,6 +7,7 @@
 //
 
 import SwiftUI
+import Foundation
 
 // MARK: - Standard Header Component
 
@@ -46,17 +47,25 @@ struct StandardHeader: View {
                         NavigationLink(destination: AIChatbotView()) {
                             Image(systemName: "sparkle")
                                 .font(.title2)
-                                .foregroundColor(.primary)
+                                .foregroundStyle(
+                                    LinearGradient(
+                                        colors: [Color.green, Color.blue],
+                                        startPoint: .topLeading,
+                                        endPoint: .bottomTrailing
+                                    )
+                                )
                         }
                         .buttonStyle(PlainButtonStyle())
                         
                         Button(action: {
-                            print("🔔 Notifications button tapped!")
+                            // Navigate to search tab
+                            NotificationCenter.default.post(name: .navigateToSearch, object: nil)
                         }) {
-                            Image(systemName: "bell")
+                            Image(systemName: "magnifyingglass")
                                 .font(.title2)
                                 .foregroundColor(.primary)
                         }
+                        .buttonStyle(PlainButtonStyle())
                     }
                 }
             }

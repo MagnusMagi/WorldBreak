@@ -157,6 +157,7 @@ class SearchViewModel: ObservableObject {
     /// Clear search history
     func clearSearchHistory() {
         searchHistoryManager.clearAllHistory()
+        searchHistory = [] // Update the UI immediately
     }
     
     // MARK: - Private Methods

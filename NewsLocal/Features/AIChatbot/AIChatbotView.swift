@@ -1,28 +1,95 @@
 import SwiftUI
 import Combine
 
-/// AI Chatbot view for intelligent news assistance
+/// Modern AI Chatbot view with enhanced UI/UX
 struct AIChatbotView: View {
     @StateObject private var viewModel = AIChatbotViewModel()
     @Environment(\.presentationMode) var presentationMode
     
     var body: some View {
         VStack(spacing: 0) {
-            // Header
+            // Modern Header
+            modernHeader
+            
+            Divider()
+            
+            // Modern Chat Area
+            ScrollViewReader { proxy in
+                ScrollView {
+                    LazyVStack(spacing: 20) {
+                        // Welcome message
+                        if viewModel.messages.isEmpty {
+                            ModernWelcomeView()
+                        }
+                        
+                        // Chat messages with modern bubbles
+                        ForEach(viewModel.messages) { message in
+                            ModernChatBubbleView(message: message)
+                                .id(message.id)
+                        }
+                        
+                        // Modern typing indicator
+                        if viewModel.isTyping {
+                            ModernTypingIndicator()
+                                .id("typing")
+                        }
+                    }
+                    .padding(.horizontal, 16)
+                    .padding(.vertical, 16)
+                }
+                .background(
+                    // Gradient background
+                    LinearGradient(
+                        colors: [
+                            Color(.systemGroupedBackground),
+                            Color(.systemGroupedBackground).opacity(0.8)
+                        ],
+                        startPoint: .top,
+                        endPoint: .bottom
+                    )
+                )
+                .onChange(of: viewModel.isTyping) { isTyping in
+                    if isTyping {
+                        // Only scroll to typing indicator when AI is typing
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.5) {
+                            withAnimation(.spring(response: 0.6, dampingFraction: 0.8)) {
+                                proxy.scrollTo("typing", anchor: .bottom)
+                            }
+                        }
+                    }
+                }
+            }
+            
+            // Modern Quick Actions
+            if viewModel.messages.isEmpty {
+                ModernQuickActionsView(viewModel: viewModel)
+                    .padding(.bottom, 20)
+            }
+            
+            // Modern Message Input
+            ModernMessageInputView(viewModel: viewModel)
+        }
+        .background(Color(.systemGroupedBackground))
+        .navigationBarHidden(true)
+        .onAppear {
+            viewModel.loadChatHistory()
+        }
+    }
+    
+    // MARK: - Standard Header (Minimal Design)
+    private var modernHeader: some View {
+        VStack(spacing: 0) {
+            // Page Title and Navigation
             HStack {
+                // Minimal back button (like categories button)
                 Button(action: {
                     presentationMode.wrappedValue.dismiss()
                 }) {
-                    HStack(spacing: 8) {
-                        Image(systemName: "chevron.left")
-                            .font(.title2)
-                        Text("Back")
-                            .font(.headline)
-                    }
-                    .foregroundColor(DesignSystem.Colors.primary)
+                    Image(systemName: "chevron.left")
+                        .font(.title2)
+                        .foregroundColor(.primary)
                 }
-                
-                Spacer()
+                .buttonStyle(PlainButtonStyle())
                 
                 Text("AI Assistant")
                     .font(.largeTitle)
@@ -31,78 +98,22 @@ struct AIChatbotView: View {
                 
                 Spacer()
                 
-                // Placeholder for symmetry
-                HStack(spacing: 8) {
-                    Image(systemName: "chevron.left")
-                        .font(.title2)
-                    Text("Back")
-                        .font(.headline)
+                // AI Status indicator (minimal)
+                HStack(spacing: 6) {
+                    Circle()
+                        .fill(viewModel.isTyping ? Color.orange : Color.green)
+                        .frame(width: 6, height: 6)
+                        .scaleEffect(viewModel.isTyping ? 1.2 : 1.0)
+                        .animation(.easeInOut(duration: 0.8).repeatForever(autoreverses: true), value: viewModel.isTyping)
+                    
+                    Text(viewModel.isTyping ? "Thinking..." : "Ready")
+                        .font(.caption)
+                        .foregroundColor(.secondary)
                 }
-                .opacity(0)
             }
             .padding(.horizontal, 16)
             .padding(.vertical, 12)
             .background(Color(.systemBackground))
-            
-            Divider()
-            
-            // Chat messages area
-            ScrollViewReader { proxy in
-                ScrollView {
-                    LazyVStack(spacing: DesignSystem.Spacing.md) {
-                        // Welcome message
-                        if viewModel.messages.isEmpty {
-                            WelcomeMessageView()
-                        }
-                        
-                        // Chat messages
-                        ForEach(viewModel.messages) { message in
-                            ChatBubbleView(message: message)
-                                .id(message.id)
-                        }
-                        
-                        // Typing indicator
-                        if viewModel.isTyping {
-                            TypingIndicatorView()
-                                .id("typing")
-                        }
-                    }
-                    .padding(.horizontal, DesignSystem.Spacing.md)
-                    .padding(.vertical, DesignSystem.Spacing.sm)
-                }
-                .onChange(of: viewModel.messages.count) { _ in
-                    withAnimation(.easeInOut(duration: 0.3)) {
-                        if let lastMessage = viewModel.messages.last {
-                            proxy.scrollTo(lastMessage.id, anchor: .bottom)
-                        }
-                    }
-                }
-                .onChange(of: viewModel.isTyping) { isTyping in
-                    if isTyping {
-                        withAnimation(.easeInOut(duration: 0.3)) {
-                            proxy.scrollTo("typing", anchor: .bottom)
-                        }
-                    }
-                }
-            }
-            
-            // Quick actions (when no messages)
-            if viewModel.messages.isEmpty {
-                QuickActionsView(viewModel: viewModel)
-                    .padding(.horizontal, DesignSystem.Spacing.md)
-                    .padding(.bottom, DesignSystem.Spacing.lg)
-            }
-            
-            // Message input area
-            MessageInputView(viewModel: viewModel)
-                .padding(.horizontal, DesignSystem.Spacing.md)
-                .padding(.bottom, DesignSystem.Spacing.sm)
-                .background(Color(.systemBackground))
-        }
-        .background(Color(.systemGroupedBackground))
-        .navigationBarHidden(true)
-        .onAppear {
-            viewModel.loadChatHistory()
         }
     }
 }

@@ -1,5 +1,11 @@
 import SwiftUI
 import Combine
+import Foundation
+
+// Notification name for tab navigation
+extension Foundation.Notification.Name {
+    static let navigateToSearch = Foundation.Notification.Name("navigateToSearch")
+}
 
 /// Tab items for the main navigation
 enum TabItem: CaseIterable {
@@ -64,6 +70,9 @@ struct ContentView: View {
             case .profile:
                 ProfileView(selectedTab: $selectedTab)
             }
+        }
+        .onReceive(NotificationCenter.default.publisher(for: .navigateToSearch)) { _ in
+            selectedTab = .search
         }
     }
 }
