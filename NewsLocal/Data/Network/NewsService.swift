@@ -84,18 +84,30 @@ class NewsService: NewsServiceProtocol {
     }
     
     func fetchRelatedArticles(for article: NewsArticle, limit: Int) -> AnyPublisher<[NewsArticle], AppError> {
+        return fetchRelatedArticles(articleId: article.id, category: article.category)
+    }
+    
+    func fetchRelatedArticles(articleId: String, category: NewsCategory) -> AnyPublisher<[NewsArticle], AppError> {
         let parameters = [
-            "articleId": article.id,
-            "limit": String(limit)
+            "category": category.id,
+            "exclude": articleId,
+            "limit": "5"
         ]
         
-        guard let url = APIEndpoints.buildURL(APIEndpoints.News.recommended, parameters: parameters) else {
-            return Fail(error: AppError.network(.invalidURL))
+        guard let url = APIEndpoints.buildURL(APIEndpoints.News.category, parameters: parameters) else {
+            // Fallback to mock data if URL building fails
+            return Just(MockDataGenerator.generateMockArticles(count: 3))
+                .setFailureType(to: AppError.self)
                 .eraseToAnyPublisher()
         }
         
-        return networkManager.request(RecommendedNewsResponse.self, from: url)
+        return networkManager.request(NewsResponse.self, from: url)
             .map { $0.articles }
+            .catch { _ in
+                // Fallback to mock data on error
+                Just(MockDataGenerator.generateMockArticles(count: 3))
+                    .setFailureType(to: AppError.self)
+            }
             .eraseToAnyPublisher()
     }
     

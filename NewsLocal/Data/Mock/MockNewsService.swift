@@ -96,9 +96,16 @@ class MockNewsService: NewsServiceProtocol {
         for article: NewsArticle,
         limit: Int
     ) -> AnyPublisher<[NewsArticle], AppError> {
+        return fetchRelatedArticles(articleId: article.id, category: article.category)
+    }
+    
+    func fetchRelatedArticles(
+        articleId: String,
+        category: NewsCategory
+    ) -> AnyPublisher<[NewsArticle], AppError> {
         let relatedArticles = mockArticles
-            .filter { $0.id != article.id && $0.category.id == article.category.id }
-            .prefix(limit)
+            .filter { $0.id != articleId && $0.category.id == category.id }
+            .prefix(5)
             .map { $0 }
         
         return Just(Array(relatedArticles))

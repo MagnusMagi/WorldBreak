@@ -23,16 +23,21 @@ struct ProfileSectionHeader: View {
     }
     
     var body: some View {
-        HStack(spacing: DesignSystem.Spacing.sm) {
+        HStack(spacing: DesignSystem.Spacing.md) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 20, weight: .medium))
                 .foregroundColor(color)
+                .frame(width: 24, height: 24)
             
             Text(title)
-                .font(DesignSystem.Typography.title3)
-                .fontWeight(.semibold)
+                .font(DesignSystem.Typography.title2_5)
+                .fontWeight(.regular)
                 .foregroundColor(DesignSystem.Colors.textPrimary)
+            
+            Spacer()
         }
+        .padding(.vertical, DesignSystem.Spacing.sm)
+        .padding(.horizontal, DesignSystem.Spacing.md)
     }
 }
 
@@ -65,10 +70,10 @@ struct ProfileListItem: View {
     
     var body: some View {
         Button(action: action) {
-            HStack(spacing: DesignSystem.Spacing.md) {
+            HStack(alignment: .center, spacing: DesignSystem.Spacing.md) {
                 // Icon
                 Image(systemName: icon)
-                    .font(.system(size: 18, weight: .medium))
+                    .font(.system(size: 20, weight: .medium))
                     .foregroundColor(color)
                     .frame(width: 24, height: 24)
                 
@@ -78,11 +83,13 @@ struct ProfileListItem: View {
                         .font(DesignSystem.Typography.body)
                         .fontWeight(.medium)
                         .foregroundColor(DesignSystem.Colors.textPrimary)
+                        .lineLimit(1)
                     
                     if let subtitle = subtitle {
                         Text(subtitle)
-                            .font(DesignSystem.Typography.caption1)
+                            .font(DesignSystem.Typography.s)
                             .foregroundColor(DesignSystem.Colors.textSecondary)
+                            .lineLimit(1)
                     }
                 }
                 
@@ -91,7 +98,7 @@ struct ProfileListItem: View {
                 // Badge
                 if let badge = badge {
                     Text(badge)
-                        .font(DesignSystem.Typography.caption1)
+                        .font(DesignSystem.Typography.xs)
                         .fontWeight(.medium)
                         .padding(.horizontal, DesignSystem.Spacing.sm)
                         .padding(.vertical, DesignSystem.Spacing.xs)
@@ -102,10 +109,11 @@ struct ProfileListItem: View {
                 
                 // Chevron
                 Image(systemName: "chevron.right")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundColor(DesignSystem.Colors.textSecondary)
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundColor(DesignSystem.Colors.textTertiary)
             }
-            .padding(.vertical, DesignSystem.Spacing.xs)
+            .padding(.vertical, DesignSystem.Spacing.md)
+            .padding(.horizontal, DesignSystem.Spacing.md)
         }
         .buttonStyle(PlainButtonStyle())
     }
@@ -120,7 +128,7 @@ struct ProfileHeaderView: View {
     let readingLevelColor: Color
     
     var body: some View {
-        HStack(spacing: DesignSystem.Spacing.md) {
+        HStack(alignment: .top, spacing: DesignSystem.Spacing.lg) {
             // Profile Image
             AsyncImage(url: user.profileImageUrl) { image in
                 image
@@ -131,23 +139,26 @@ struct ProfileHeaderView: View {
                     .fill(DesignSystem.Colors.primary.opacity(0.1))
                     .overlay(
                         Image(systemName: "person.fill")
-                            .font(.system(size: 24, weight: .medium))
+                            .font(.system(size: 40, weight: .medium))
                             .foregroundColor(DesignSystem.Colors.primary)
                     )
             }
-            .frame(width: 60, height: 60)
+            .frame(width: 78, height: 78)
             .clipShape(Circle())
+            .shadow(color: DesignSystem.Colors.shadow, radius: 2, x: 0, y: 1)
             
             // User Info
-            VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+            VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                 Text(user.name)
-                    .font(DesignSystem.Typography.title3)
-                    .fontWeight(.semibold)
+                    .font(DesignSystem.Typography.title2_5)
+                    .fontWeight(.regular)
                     .foregroundColor(DesignSystem.Colors.textPrimary)
+                    .lineLimit(1)
                 
                 Text(user.email)
-                    .font(DesignSystem.Typography.subheadline)
+                    .font(DesignSystem.Typography.s)
                     .foregroundColor(DesignSystem.Colors.textSecondary)
+                    .lineLimit(1)
                 
                 // Reading Level Badge
                 HStack(spacing: DesignSystem.Spacing.xs) {
@@ -156,7 +167,7 @@ struct ProfileHeaderView: View {
                         .frame(width: 6, height: 6)
                     
                     Text(readingLevel)
-                        .font(DesignSystem.Typography.caption1)
+                        .font(DesignSystem.Typography.xs)
                         .fontWeight(.medium)
                         .foregroundColor(readingLevelColor)
                 }
@@ -170,7 +181,8 @@ struct ProfileHeaderView: View {
             
             Spacer()
         }
-        .padding(.vertical, DesignSystem.Spacing.sm)
+        .padding(.vertical, DesignSystem.Spacing.lg)
+        .padding(.horizontal, DesignSystem.Spacing.md)
     }
 }
 
@@ -184,24 +196,27 @@ struct StatisticsRow: View {
     let color: Color
     
     var body: some View {
-        HStack(spacing: DesignSystem.Spacing.md) {
+        HStack(alignment: .center, spacing: DesignSystem.Spacing.md) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 18, weight: .medium))
                 .foregroundColor(color)
-                .frame(width: 20, height: 20)
+                .frame(width: 24, height: 24)
             
             Text(title)
-                .font(DesignSystem.Typography.body)
+                .font(DesignSystem.Typography.s)
                 .foregroundColor(DesignSystem.Colors.textPrimary)
+                .lineLimit(1)
             
             Spacer()
             
             Text(value)
-                .font(DesignSystem.Typography.body)
+                .font(DesignSystem.Typography.sBold)
                 .fontWeight(.medium)
                 .foregroundColor(DesignSystem.Colors.textSecondary)
+                .lineLimit(1)
         }
-        .padding(.vertical, DesignSystem.Spacing.xs)
+        .padding(.vertical, DesignSystem.Spacing.sm)
+        .padding(.horizontal, DesignSystem.Spacing.md)
     }
 }
 

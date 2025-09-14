@@ -57,6 +57,16 @@ protocol NewsServiceProtocol {
         limit: Int
     ) -> AnyPublisher<[NewsArticle], AppError>
     
+    /// Fetch related articles by article ID and category
+    /// - Parameters:
+    ///   - articleId: Article ID to find related content for
+    ///   - category: Category to find related articles in
+    /// - Returns: Publisher that emits array of related articles
+    func fetchRelatedArticles(
+        articleId: String,
+        category: NewsCategory
+    ) -> AnyPublisher<[NewsArticle], AppError>
+    
     // MARK: - Search Operations
     
     /// Search articles with query and optional filters

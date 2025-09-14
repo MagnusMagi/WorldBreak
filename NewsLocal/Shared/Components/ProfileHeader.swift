@@ -19,7 +19,7 @@ struct ProfileHeader: View {
     
     var body: some View {
         VStack(spacing: 0) {
-            HStack(spacing: DesignSystem.Spacing.md) {
+            HStack(alignment: .top, spacing: DesignSystem.Spacing.lg) {
                 // Profile Image
                 AsyncImage(url: user.profileImageUrl) { image in
                     image
@@ -30,23 +30,26 @@ struct ProfileHeader: View {
                         .fill(DesignSystem.Colors.primary.opacity(0.1))
                         .overlay(
                             Image(systemName: "person.fill")
-                                .font(.system(size: 24, weight: .medium))
+                                .font(.system(size: 40, weight: .medium))
                                 .foregroundColor(DesignSystem.Colors.primary)
                         )
                 }
-                .frame(width: 60, height: 60)
+                .frame(width: 78, height: 78)
                 .clipShape(Circle())
+                .shadow(color: DesignSystem.Colors.shadow, radius: 2, x: 0, y: 1)
                 
                 // User Info
-                VStack(alignment: .leading, spacing: DesignSystem.Spacing.xs) {
+                VStack(alignment: .leading, spacing: DesignSystem.Spacing.sm) {
                     Text(user.name)
-                        .font(DesignSystem.Typography.title3)
-                        .fontWeight(.semibold)
+                        .font(DesignSystem.Typography.title2_5)
+                        .fontWeight(.regular)
                         .foregroundColor(DesignSystem.Colors.textPrimary)
+                        .lineLimit(1)
                     
                     Text(user.email)
-                        .font(DesignSystem.Typography.subheadline)
+                        .font(DesignSystem.Typography.s)
                         .foregroundColor(DesignSystem.Colors.textSecondary)
+                        .lineLimit(1)
                     
                     // Reading Level Badge
                     HStack(spacing: DesignSystem.Spacing.xs) {
@@ -55,7 +58,7 @@ struct ProfileHeader: View {
                             .frame(width: 6, height: 6)
                         
                         Text(readingLevel)
-                            .font(DesignSystem.Typography.caption1)
+                            .font(DesignSystem.Typography.xs)
                             .fontWeight(.medium)
                             .foregroundColor(readingLevelColor)
                     }
@@ -74,7 +77,7 @@ struct ProfileHeader: View {
                     Image(systemName: "pencil")
                         .font(.system(size: 18, weight: .medium))
                         .foregroundColor(DesignSystem.Colors.primary)
-                        .frame(width: 32, height: 32)
+                        .frame(width: 36, height: 36)
                         .background(
                             Circle()
                                 .fill(DesignSystem.Colors.primary.opacity(0.1))
@@ -82,8 +85,9 @@ struct ProfileHeader: View {
                 }
                 .buttonStyle(PlainButtonStyle())
             }
-            .padding(.horizontal, DesignSystem.Spacing.md)
-            .padding(.vertical, DesignSystem.Spacing.md)
+            .padding(.leading, 13)
+            .padding(.trailing, DesignSystem.Spacing.md)
+            .padding(.vertical, DesignSystem.Spacing.lg)
             
             Divider()
                 .background(DesignSystem.Colors.textTertiary)
@@ -112,7 +116,7 @@ struct ProfileHeaderWithStats: View {
             )
             
             // Quick Stats Row
-            HStack(spacing: DesignSystem.Spacing.lg) {
+            HStack(spacing: DesignSystem.Spacing.md) {
                 QuickStatItem(
                     icon: "book.fill",
                     value: "\(user.statistics.articlesRead)",
@@ -141,8 +145,9 @@ struct ProfileHeaderWithStats: View {
                     color: DesignSystem.Colors.warning
                 )
             }
-            .padding(.horizontal, DesignSystem.Spacing.md)
-            .padding(.vertical, DesignSystem.Spacing.md)
+            .padding(.leading, 13)
+            .padding(.trailing, DesignSystem.Spacing.md)
+            .padding(.vertical, DesignSystem.Spacing.lg)
             .background(DesignSystem.Colors.backgroundSecondary)
             
             Divider()
@@ -163,19 +168,25 @@ struct QuickStatItem: View {
     var body: some View {
         VStack(spacing: DesignSystem.Spacing.xs) {
             Image(systemName: icon)
-                .font(.system(size: 16, weight: .medium))
+                .font(.system(size: 18, weight: .medium))
                 .foregroundColor(color)
+                .frame(width: 24, height: 24)
             
             Text(value)
-                .font(DesignSystem.Typography.title3)
+                .font(DesignSystem.Typography.sBold)
                 .fontWeight(.bold)
                 .foregroundColor(DesignSystem.Colors.textPrimary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
             
             Text(label)
-                .font(DesignSystem.Typography.caption2)
+                .font(DesignSystem.Typography.xs)
                 .foregroundColor(DesignSystem.Colors.textSecondary)
+                .lineLimit(1)
+                .minimumScaleFactor(0.8)
         }
         .frame(maxWidth: .infinity)
+        .padding(.vertical, DesignSystem.Spacing.xs)
     }
 }
 
@@ -201,8 +212,6 @@ struct ProfileHeader_Previews: PreviewProvider {
                     print("Edit profile tapped")
                 }
             )
-            
-            Spacer()
         }
         .background(DesignSystem.Colors.background)
     }

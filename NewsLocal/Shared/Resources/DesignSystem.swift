@@ -62,6 +62,7 @@ struct DesignSystem {
         static let largeTitle = Font.system(size: 34, weight: .bold, design: .default)
         static let title1 = Font.system(size: 28, weight: .bold, design: .default)
         static let title2 = Font.system(size: 22, weight: .bold, design: .default)
+        static let title2_5 = Font.system(size: 18, weight: .semibold, design: .default)
         static let title3 = Font.system(size: 20, weight: .semibold, design: .default)
         
         // Body Text
@@ -74,6 +75,11 @@ struct DesignSystem {
         static let footnote = Font.system(size: 13, weight: .regular, design: .default)
         static let caption1 = Font.system(size: 12, weight: .regular, design: .default)
         static let caption2 = Font.system(size: 11, weight: .regular, design: .default)
+        
+        // Extra Small and Small sizes
+        static let xs = Font.system(size: 10, weight: .regular, design: .default)
+        static let s = Font.system(size: 14, weight: .regular, design: .default)
+        static let sBold = Font.system(size: 14, weight: .semibold, design: .default)
         
         // Special
         static let button = Font.system(size: 16, weight: .semibold, design: .default)
@@ -172,6 +178,11 @@ extension View {
             .foregroundColor(DesignSystem.Colors.textPrimary)
     }
     
+    func title2_5Style() -> some View {
+        self.font(DesignSystem.Typography.title2_5)
+            .foregroundColor(DesignSystem.Colors.textPrimary)
+    }
+    
     func title3Style() -> some View {
         self.font(DesignSystem.Typography.title3)
             .foregroundColor(DesignSystem.Colors.textPrimary)
@@ -195,6 +206,21 @@ extension View {
     func footnoteStyle() -> some View {
         self.font(DesignSystem.Typography.footnote)
             .foregroundColor(DesignSystem.Colors.textSecondary)
+    }
+    
+    func xsStyle() -> some View {
+        self.font(DesignSystem.Typography.xs)
+            .foregroundColor(DesignSystem.Colors.textSecondary)
+    }
+    
+    func sStyle() -> some View {
+        self.font(DesignSystem.Typography.s)
+            .foregroundColor(DesignSystem.Colors.textPrimary)
+    }
+    
+    func sBoldStyle() -> some View {
+        self.font(DesignSystem.Typography.sBold)
+            .foregroundColor(DesignSystem.Colors.textPrimary)
     }
     
     // MARK: - Card Modifiers
