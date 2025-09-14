@@ -1,34 +1,72 @@
 import SwiftUI
 
+/// Main SearchView with SearchBar integration and content switching
 struct SearchView: View {
     @Binding var selectedTab: TabItem
+    @StateObject private var viewModel = SearchViewModel()
+    @State private var showingFilterSheet = false
     
     var body: some View {
-        NavigationView {
-            StandardPageWrapper(
-                title: "Search",
-                showCategories: false,
-                selectedCategory: nil,
-                selectedTab: .search,
-                onCategorySelected: nil,
-                onTabSelected: { tab in
-                    selectedTab = tab
-                }
-            ) {
-                VStack {
-                    Text("Search View")
-                        .font(.title2)
-                        .foregroundColor(.primary)
-                    
-                    Text("Search functionality will be implemented here")
-                        .font(.body)
-                        .foregroundColor(.secondary)
-                        .multilineTextAlignment(.center)
-                    
-                    Spacer()
-                }
-                .padding()
+        StandardPageWrapper(
+            title: "Search",
+            showCategories: false,
+            selectedCategory: nil,
+            selectedTab: selectedTab,
+            onCategorySelected: nil,
+            onTabSelected: { tab in
+                selectedTab = tab
             }
+        ) {
+            VStack(spacing: 0) {
+                // Search Bar Section
+                VStack(spacing: DesignSystem.Spacing.sm) {
+                    SearchBarView(
+                        searchText: $viewModel.searchText,
+                        onSearchButtonClicked: {
+                            viewModel.performSearch()
+                        }
+                    )
+                    
+                    // Active Filters Bar (if filters are active)
+                    if viewModel.hasActiveFilters {
+                        ActiveFiltersBar(
+                            filterCount: viewModel.activeFilterCount,
+                            onClearFilters: {
+                                viewModel.clearFilters()
+                            },
+                            onShowFilters: {
+                                showingFilterSheet = true
+                            }
+                        )
+                    }
+                }
+                .padding(.horizontal, DesignSystem.Spacing.md)
+                .padding(.vertical, DesignSystem.Spacing.sm)
+                
+                // Content Section
+                if viewModel.hasSearched {
+                    SearchResultsView(viewModel: viewModel)
+                } else {
+                    SearchHomeView(viewModel: viewModel)
+                }
+            }
+        }
+        .sheet(isPresented: $showingFilterSheet) {
+            FilterSheet(
+                filters: $viewModel.filters,
+                onApply: { filters in
+                    viewModel.applyFilters(filters)
+                    showingFilterSheet = false
+                },
+                onClear: {
+                    viewModel.clearFilters()
+                    showingFilterSheet = false
+                }
+            )
+        }
+        .onAppear {
+            // Load trending topics and search history when view appears
+            viewModel.loadTrendingTopics()
         }
     }
 }

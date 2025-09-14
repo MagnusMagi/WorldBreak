@@ -209,8 +209,8 @@ class SearchViewModel: ObservableObject {
             .store(in: &cancellables)
     }
     
-    /// Load trending topics
-    private func loadTrendingTopics() {
+    /// Load trending topics (public method)
+    func loadTrendingTopics() {
         newsService.getTrendingTopics(limit: 10)
             .receive(on: DispatchQueue.main)
             .sink(
