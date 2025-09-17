@@ -9,9 +9,18 @@ import SwiftUI
 
 @main
 struct WorldBreakApp: App {
+    @StateObject private var userPreferences = UserPreferences()
+    
     var body: some Scene {
         WindowGroup {
-            ContentView()
+            Group {
+                if userPreferences.isPersonalizationCompleted {
+                    NewsFeedView()
+                } else {
+                    LaunchScreen()
+                }
+            }
+            .environmentObject(userPreferences)
         }
     }
 }
